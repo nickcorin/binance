@@ -1,5 +1,10 @@
-# binance
-Binance HTTP Client Library written in Go.
+
+# Binance
+[![Go Report Card](https://goreportcard.com/badge/github.com/nickcorin/binance)](https://goreportcard.com/report/github.com/nickcorin/binance)
+[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/nickcorin/binance)
+
+## About the package
+This package provides a client library to interface with Binance's REST API.
 
 **This package is a work in progress.**
 
