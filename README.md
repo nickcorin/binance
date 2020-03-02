@@ -3,9 +3,9 @@ Binance HTTP Client Library written in Go.
 
 **This package is a work in progress.**
 
-The package is incomplete and not fully tested. Contributions are welcome.
+The package is incomplete and not fully tested. I am following the API documentation for Binance found [here](https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md).
 
-I am following the API documentation for Binance found [here](https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md).
+Contributions are welcome.
 
 ***
 
