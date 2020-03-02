@@ -12,8 +12,7 @@ The package is incomplete and not fully tested. I am following the API documenta
 
 Contributions are welcome.
 
-***
-
+## Supported Endpoints
 ### Public API
 
 - [x] Ping
