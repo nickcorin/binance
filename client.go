@@ -14,7 +14,7 @@ import (
 )
 
 type client struct {
-	options *clientOptions
+	options *ClientOptions
 }
 
 // New returns a concrete Client implementation.
@@ -45,6 +45,21 @@ func (c *client) call(ctx context.Context, method, path string,
 		return 0, nil, errors.Wrap(err, "failed to create request")
 	}
 
+	req.Headers().Set("Content-type", "application/x-www-form-urlencoded")
+
+	sanitizedPath := stripQueryParams(path)
+	securityLevel := securityLevels[sanitizedPath][method]
+
+	// TODO(Nick): Implement auth headers.
+	if securityLevel > SecurityLevelNone {
+		req = c.setAuthHeader(req)
+	}
+
+	// TODO(Nick): Implement signature generation.
+	if securityLevel > SecurityLevelMarketData {
+		req = c.setSignature(req)
+	}
+
 	reqStart := time.Now()
 	res, err := c.options.transport.Do(req)
 	if err != nil {
@@ -52,7 +67,6 @@ func (c *client) call(ctx context.Context, method, path string,
 	}
 	latency := time.Since(reqStart)
 
-	sanitizedPath := stripQueryParams(path)
 	httpRequestLatency.WithLabelValues(sanitizedPath).Observe(latency.Seconds())
 	httpResponseCodes.WithLabelValues(sanitizedPath,
 		fmt.Sprintf("%d", res.StatusCode)).Inc()
@@ -88,9 +102,14 @@ func (c *client) post(ctx context.Context, path string, body io.Reader) (int,
 	return c.call(ctx, http.MethodPost, path, body)
 }
 
+func (c *client) delete(ctx context.Context, path string, body io.Reader) (int,
+	[]byte, error) {
+	return c.call(ctx, http.MethodDelete, path, body)
+}
+
 // Ping tests the connectivity to the API.
 func (c *client) Ping(ctx context.Context) error {
-	code, _, err := c.call(ctx, http.MethodGet, "/ping", nil)
+	code, _, err := c.get(ctx, "/ping")
 	if err != nil {
 		return err
 	}

@@ -4,13 +4,13 @@ import "net/http"
 
 var defaultOptions = ClientOptions{
 	baseURL:   "https://api.binance.com/api/v3",
-	logLevel:  LogLevelNone,
 	transport: http.DefaultClient,
 }
 
 // ClientOptions provides configurable fields for Client.
 type ClientOptions struct {
 	apiKey    string
+	secretKey string
 	baseURL   string
 	logLevel  LogLevel
 	transport *http.Client
@@ -41,8 +41,8 @@ func (level LogLevel) Valid() bool {
 }
 
 // WithAPIKey returns a ClientOption to set the API Key a Client uses to
-// authenticate requests. Not using this option will cause all requests to be
-// unauthenticated.
+// authenticate requests. Not using this option will cause all authenticated
+// requests to fail.
 func WithAPIKey(key string) ClientOption {
 	return func(opts *ClientOptions) {
 		opts.apiKey = key
@@ -66,6 +66,15 @@ func WithLogLevel(level LogLevel) ClientOption {
 
 	return func(opts *ClientOptions) {
 		opts.logLevel = level
+	}
+}
+
+// WithSecretKey returns a ClientOption to set the secret key a Client uses
+// to generate request signatures. Not using this option will cause all
+// signed requests to fail.
+func WithSecretKey(key string) ClientOption {
+	return func(opts *ClientOptions) {
+		opts.secretKey = key
 	}
 }
 
