@@ -17,8 +17,7 @@ type client struct {
 	options *clientOptions
 }
 
-// New returns an HTTP client implementation to communicate with the Binance
-// API.
+// New returns a concrete Client implementation.
 func New(opts ...ClientOption) Client {
 	c := client{
 		options: &defaultOptions,
