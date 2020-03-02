@@ -12,33 +12,33 @@ I am following the API documentation for Binance found [here](https://github.com
 ### Public API
 
 - [x] Ping
-- [] Server Time
-- [] Exchange Info
+- [ ] Server Time
+- [ ] Exchange Info
 
 ### Market Data
 
-- [] Order Book
-- [] Recent Trades
-- [] Old Trade Data
-- [] Aggregated Trades
-- [] Kline / Candlestick Data
-- [] Current Average Price
-- [] 24 Hour Ticker
-- [] Price Ticker
-- [] Order Book Ticker
+- [ ] Order Book
+- [ ] Recent Trades
+- [ ] Old Trade Data
+- [ ] Aggregated Trades
+- [ ] Kline / Candlestick Data
+- [ ] Current Average Price
+- [ ] 24 Hour Ticker
+- [ ] Price Ticker
+- [ ] Order Book Ticker
 
 ### Account
 
-- [] New Order
-- [] Test New Order
-- [] Query Order
-- [] Cancel Order
-- [] Current Open Orders
-- [] All Orders
-- [] New OCO
-- [] Cancel OCO
-- [] Query OCO
-- [] Query All OCO
-- [] Query Open OCO
-- [] Account Info
-- [] Account Trade List
+- [ ] New Order
+- [ ] Test New Order
+- [ ] Query Order
+- [ ] Cancel Order
+- [ ] Current Open Orders
+- [ ] All Orders
+- [ ] New OCO
+- [ ] Cancel OCO
+- [ ] Query OCO
+- [ ] Query All OCO
+- [ ] Query Open OCO
+- [ ] Account Info
+- [ ] Account Trade List
