@@ -3,6 +3,7 @@ package binance
 import (
 	"encoding/json"
 	"strconv"
+	"time"
 )
 
 type orderBookResponse struct {
@@ -62,4 +63,58 @@ func (book *OrderBook) UnmarshalJSON(data []byte) error {
 type OrderBookEntry struct {
 	Price  float64
 	Volume float64
+}
+
+type tradeResponse struct {
+	ID           int64  `json:"id"`
+	Price        string `json:"price"`
+	Volume       string `json:"qty"`
+	QuoteVolume  string `json:"quoteQty"`
+	Timestamp    int64  `json:"time"`
+	IsBuyerMaker bool   `json:"isBuyerMaker"`
+	IsBestMatch  bool   `json:"isBestMatch"`
+}
+
+// Trade represents an order that has been successfully executed.
+type Trade struct {
+	ID           int64
+	Price        float64
+	Volume       float64
+	QuoteVolume  float64
+	Timestamp    time.Time
+	IsBuyerMaker bool
+	IsBestMatch  bool
+}
+
+func (t *Trade) UnmarshalJSON(data []byte) error {
+	var resp tradeResponse
+	err := json.Unmarshal(data, &resp)
+	if err != nil {
+		return err
+	}
+
+	p, err := strconv.ParseFloat(resp.Price, 64)
+	if err != nil {
+		return err
+	}
+
+	v, err := strconv.ParseFloat(resp.Volume, 64)
+	if err != nil {
+		return err
+	}
+
+	qv, err := strconv.ParseFloat(resp.QuoteVolume, 64)
+	if err != nil {
+		return err
+	}
+
+	t.ID = resp.ID
+	t.Price = p
+	t.Volume = v
+	t.QuoteVolume = qv
+	t.Timestamp = time.Unix(0, resp.Timestamp*1e6)
+	t.IsBuyerMaker = resp.IsBuyerMaker
+	t.IsBestMatch = resp.IsBestMatch
+
+	return nil
 }

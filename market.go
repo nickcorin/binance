@@ -25,3 +25,21 @@ func (c *client) OrderBook(ctx context.Context, symbol Symbol, limit int) (
 
 	return &book, nil
 }
+
+// Recent trades returns a list of recent trades executed on the exchange. Max
+// limit is 1000.
+func (c *client) RecentTrades(ctx context.Context, symbol Symbol, limit int) (
+	[]Trade, error) {
+	res, err := c.get(ctx, fmt.Sprintf("/trades?symbol=%s&limit=%d",
+		symbol.String(), limit))
+	if err != nil {
+		return nil, err
+	}
+
+	var trades []Trade
+	if err = json.Unmarshal(res, &trades); err != nil {
+		return nil, err
+	}
+
+	return trades, nil
+}

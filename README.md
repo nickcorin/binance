@@ -22,7 +22,7 @@ Contributions are welcome.
 ### Market Data
 
 - [x] Order Book
-- [ ] Recent Trades
+- [x] Recent Trades
 - [ ] Old Trade Data
 - [ ] Aggregated Trades
 - [ ] Kline / Candlestick Data
