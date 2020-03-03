@@ -168,9 +168,8 @@ func (c *client) ServerTime(ctx context.Context) (time.Time, error) {
 		Milliseconds int64 `json:"serverTime"`
 	}{}
 
-	err = json.Unmarshal(res, &timeResponse)
-	if err != nil {
-		return time.Time{}, err
+	if err = json.Unmarshal(res, &timeResponse); err != nil {
+		return time.Time{}, errors.Wrap(err, "failed to parse server time")
 	}
 
 	return time.Unix(0, timeResponse.Milliseconds*1e6), nil

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/luno/jettison/errors"
 )
 
 // OrderBook returns the current state of the exchange's order book with a list
@@ -20,7 +22,7 @@ func (c *client) OrderBook(ctx context.Context, symbol Symbol, limit int) (
 
 	var book OrderBook
 	if err = json.Unmarshal(res, &book); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to parse order book")
 	}
 
 	return &book, nil
@@ -38,7 +40,7 @@ func (c *client) RecentTrades(ctx context.Context, symbol Symbol, limit int) (
 
 	var trades []Trade
 	if err = json.Unmarshal(res, &trades); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to parse trades")
 	}
 
 	return trades, nil
@@ -57,7 +59,7 @@ func (c *client) HistoricalTrades(ctx context.Context, symbol Symbol, limit int,
 
 	var trades []Trade
 	if err = json.Unmarshal(res, &trades); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to parse trades")
 	}
 
 	return trades, err
