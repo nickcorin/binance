@@ -6,6 +6,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -105,6 +106,12 @@ func (c *client) call(ctx context.Context, method, path string,
 		return 0, nil, errors.Wrap(err, "failed to read response bytes")
 	}
 
+	var apiErr Error
+	err = json.Unmarshal(b, &apiErr)
+	if err == nil {
+		return res.StatusCode, nil, apiErr
+	}
+
 	return res.StatusCode, b, nil
 }
 
@@ -129,13 +136,9 @@ func (c *client) delete(ctx context.Context, path string, body []byte) (int,
 
 // Ping tests the connectivity to the API.
 func (c *client) Ping(ctx context.Context) error {
-	code, _, err := c.get(ctx, "/ping")
+	_, _, err := c.get(ctx, "/ping")
 	if err != nil {
 		return err
-	}
-
-	if code != http.StatusOK {
-		return errors.New("ping: non-2xx status code received")
 	}
 
 	return nil
