@@ -34,14 +34,26 @@ func TestRecentTrades_OK(t *testing.T) {
 	require.Equal(t, 1, len(trades))
 }
 
+func TestHistoricalTradesFrom_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	trades, err := c.HistoricalTradesFrom(context.Background(), ETHBTC, 10,
+		int64(1))
+	require.NoError(t, err)
+	require.NotNil(t, trades)
+	require.Equal(t, 1, len(trades))
+}
+
 func TestHistoricalTrades_OK(t *testing.T) {
 	srv, err := createTestServer(t, http.StatusOK)
 	require.NoError(t, err)
 	defer srv.Close()
 
 	c := NewClient(WithBaseURL(srv.URL))
-	trades, err := c.HistoricalTrades(context.Background(), ETHBTC, 10,
-		int64(1))
+	trades, err := c.HistoricalTrades(context.Background(), ETHBTC, 10)
 	require.NoError(t, err)
 	require.NotNil(t, trades)
 	require.Equal(t, 1, len(trades))

@@ -48,8 +48,26 @@ func (c *client) RecentTrades(ctx context.Context, symbol Symbol, limit int) (
 
 // HistoricalTrades returns a historical list of trades executed on the
 // exchange. Max limit is 1000.
-func (c *client) HistoricalTrades(ctx context.Context, symbol Symbol, limit int,
-	from int64) ([]Trade, error) {
+func (c *client) HistoricalTrades(ctx context.Context, symbol Symbol,
+	limit int) ([]Trade, error) {
+	res, err := c.get(ctx, fmt.Sprintf("/historicalTrades?symbol=%s&limit=%d",
+		symbol, limit))
+	if err != nil {
+		return nil, err
+	}
+
+	var trades []Trade
+	if err = json.Unmarshal(res, &trades); err != nil {
+		return nil, errors.Wrap(err, "failed to parse trades")
+	}
+
+	return trades, err
+}
+
+// HistoricalTradesFrom returns a historical list of trades executed on the
+// exchange after a given trade ID. Max limit is 1000.
+func (c *client) HistoricalTradesFrom(ctx context.Context, symbol Symbol,
+	limit int, from int64) ([]Trade, error) {
 	res, err := c.get(ctx,
 		fmt.Sprintf("/historicalTrades?symbol=%s&limit=%d&fromId=%d",
 			symbol, limit, from))
