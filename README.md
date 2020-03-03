@@ -23,7 +23,7 @@ Contributions are welcome.
 
 - [x] Order Book
 - [x] Recent Trades
-- [ ] Old Trade Data
+- [x] Old Trade Data
 - [ ] Aggregated Trades
 - [ ] Kline / Candlestick Data
 - [ ] Current Average Price
