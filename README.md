@@ -21,7 +21,7 @@ Contributions are welcome.
 
 ### Market Data
 
-- [ ] Order Book
+- [x] Order Book
 - [ ] Recent Trades
 - [ ] Old Trade Data
 - [ ] Aggregated Trades

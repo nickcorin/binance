@@ -34,12 +34,10 @@ func createTestServer(t *testing.T, statusCode int) (*httptest.Server, error) {
 	}
 
 	h := func(w http.ResponseWriter, r *http.Request) {
-		t.Log("In the handler")
 		w.WriteHeader(statusCode)
 		w.Write(response)
 	}
 
 	srv := httptest.NewServer(http.HandlerFunc(h))
-	t.Logf("test server running on %s", srv.URL)
 	return srv, nil
 }
