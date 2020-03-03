@@ -30,6 +30,18 @@ func (level SecurityLevel) Valid() bool {
 	return level >= SecurityLevelNone && level < securityLevelSentinel
 }
 
+// RequiresAuth returns whether a SecurityLevel requires a request to have an
+// authentication header present.
+func (level SecurityLevel) RequiresAuth() bool {
+	return level.Valid() && level >= SecurityLevelUserStream
+}
+
+// RequiresSigning returns whether a SecurityLevel requires a request to be
+// signed.
+func (level SecurityLevel) RequiresSigning() bool {
+	return level.Valid() && level >= SecurityLevelTrade
+}
+
 var securityGroups = map[string]map[string]SecurityLevel{
 	"/account": {
 		http.MethodGet: SecurityLevelUserData,

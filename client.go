@@ -1,11 +1,15 @@
 package binance
 
 import (
+	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/luno/jettison/errors"
@@ -17,7 +21,7 @@ type client struct {
 	options *ClientOptions
 }
 
-// New returns a concrete Client implementation.
+// New returns a Client implementation.
 func New(opts ...ClientOption) Client {
 	c := client{
 		options: &defaultOptions,
@@ -31,33 +35,56 @@ func New(opts ...ClientOption) Client {
 	return &c
 }
 
+func (c *client) setAuthHeader(r *http.Request) *http.Request {
+	r.Header.Set("X-MBX-APIKEY", c.options.apiKey)
+	return r
+}
+
+func (c *client) signRequest(r *http.Request, body []byte) *http.Request {
+	sig := hmac.New(sha256.New, []byte(c.options.secretKey))
+
+	timestamp := time.Now().UnixNano() / 1e6
+	values := r.URL.Query()
+
+	values.Set("timestamp", fmt.Sprintf("%d", timestamp))
+	fmt.Printf("DEBUG (query): %s\n", values.Encode())
+	fmt.Printf("DEBUG (body): %s\n", body)
+	sig.Write([]byte(values.Encode()))
+	sig.Write(body)
+
+	values.Set("signature", hex.EncodeToString(sig.Sum(nil)))
+	r.URL.RawQuery = values.Encode()
+	return r
+}
+
 func (c *client) call(ctx context.Context, method, path string,
-	body io.Reader) (int, []byte, error) {
+	body []byte) (int, []byte, error) {
 
-	ctx = log.ContextWith(ctx, j.MKV{
-		method: method,
-		path:   path,
-	})
+	// Add useful data into the context to be included in logs.
+	ctx = log.ContextWith(ctx, j.MKV{"method": method, "path": path})
 
-	req, err := http.NewRequest(method, fmt.Sprintf("%s%s",
-		c.options.baseURL, path), body)
+	u, err := url.ParseRequestURI(fmt.Sprintf("%s%s", c.options.baseURL,
+		path))
+	if err != nil {
+		return 0, nil, errors.Wrap(err, "failed to parse uri")
+	}
+
+	req, err := http.NewRequestWithContext(ctx, method, u.String(),
+		bytes.NewBuffer(body))
 	if err != nil {
 		return 0, nil, errors.Wrap(err, "failed to create request")
 	}
 
-	req.Headers().Set("Content-type", "application/x-www-form-urlencoded")
+	// Set required headers and sign request.
+	req.Header.Set("Content-type", "application/x-www-form-urlencoded")
 
-	sanitizedPath := stripQueryParams(path)
-	securityLevel := securityLevels[sanitizedPath][method]
-
-	// TODO(Nick): Implement auth headers.
-	if securityLevel > SecurityLevelNone {
+	securityGroup := securityGroups[u.Path][method]
+	if securityGroup.RequiresAuth() {
 		req = c.setAuthHeader(req)
 	}
 
-	// TODO(Nick): Implement signature generation.
-	if securityLevel > SecurityLevelMarketData {
-		req = c.setSignature(req)
+	if securityGroup.RequiresSigning() {
+		req = c.signRequest(req, body)
 	}
 
 	reqStart := time.Now()
@@ -67,17 +94,10 @@ func (c *client) call(ctx context.Context, method, path string,
 	}
 	latency := time.Since(reqStart)
 
-	httpRequestLatency.WithLabelValues(sanitizedPath).Observe(latency.Seconds())
-	httpResponseCodes.WithLabelValues(sanitizedPath,
-		fmt.Sprintf("%d", res.StatusCode)).Inc()
-
-	if c.options.logLevel >= LogLevelInfo {
-		log.Info(ctx, "",
-			j.MKV{
-				"status_code": res.StatusCode,
-				"latency":     latency.String(),
-			})
-	}
+	// Record system metrics.
+	httpRequestLatency.WithLabelValues(u.Path).Observe(latency.Seconds())
+	httpResponseCodes.WithLabelValues(u.Path, fmt.Sprintf("%d",
+		res.StatusCode)).Inc()
 
 	defer res.Body.Close()
 	b, err := ioutil.ReadAll(res.Body)
@@ -92,17 +112,17 @@ func (c *client) get(ctx context.Context, path string) (int, []byte, error) {
 	return c.call(ctx, http.MethodGet, path, nil)
 }
 
-func (c *client) put(ctx context.Context, path string, body io.Reader) (int,
+func (c *client) put(ctx context.Context, path string, body []byte) (int,
 	[]byte, error) {
 	return c.call(ctx, http.MethodPut, path, body)
 }
 
-func (c *client) post(ctx context.Context, path string, body io.Reader) (int,
+func (c *client) post(ctx context.Context, path string, body []byte) (int,
 	[]byte, error) {
 	return c.call(ctx, http.MethodPost, path, body)
 }
 
-func (c *client) delete(ctx context.Context, path string, body io.Reader) (int,
+func (c *client) delete(ctx context.Context, path string, body []byte) (int,
 	[]byte, error) {
 	return c.call(ctx, http.MethodDelete, path, body)
 }
