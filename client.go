@@ -22,8 +22,8 @@ type client struct {
 	options *ClientOptions
 }
 
-// New returns a Client implementation.
-func New(opts ...ClientOption) Client {
+// NewClient returns a Client implementation.
+func NewClient(opts ...ClientOption) Client {
 	c := client{
 		options: &defaultOptions,
 	}
@@ -59,7 +59,7 @@ func (c *client) signRequest(r *http.Request, body []byte) *http.Request {
 }
 
 func (c *client) call(ctx context.Context, method, path string,
-	body []byte) (int, []byte, error) {
+	body []byte) ([]byte, error) {
 
 	// Add useful data into the context to be included in logs.
 	ctx = log.ContextWith(ctx, j.MKV{"method": method, "path": path})
@@ -67,13 +67,13 @@ func (c *client) call(ctx context.Context, method, path string,
 	u, err := url.ParseRequestURI(fmt.Sprintf("%s%s", c.options.baseURL,
 		path))
 	if err != nil {
-		return 0, nil, errors.Wrap(err, "failed to parse uri")
+		return nil, errors.Wrap(err, "failed to parse uri")
 	}
 
 	req, err := http.NewRequestWithContext(ctx, method, u.String(),
 		bytes.NewBuffer(body))
 	if err != nil {
-		return 0, nil, errors.Wrap(err, "failed to create request")
+		return nil, errors.Wrap(err, "failed to create request")
 	}
 
 	// Set required headers and sign request.
@@ -91,7 +91,7 @@ func (c *client) call(ctx context.Context, method, path string,
 	reqStart := time.Now()
 	res, err := c.options.transport.Do(req)
 	if err != nil {
-		return 0, nil, errors.Wrap(err, "request failed")
+		return nil, errors.Wrap(err, "request failed")
 	}
 	latency := time.Since(reqStart)
 
@@ -103,43 +103,75 @@ func (c *client) call(ctx context.Context, method, path string,
 	defer res.Body.Close()
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return 0, nil, errors.Wrap(err, "failed to read response bytes")
+		return nil, errors.Wrap(err, "failed to read response bytes")
 	}
 
-	var apiErr Error
-	err = json.Unmarshal(b, &apiErr)
-	if err == nil {
-		return res.StatusCode, nil, apiErr
+	// We can assume that 2XX response codes mean that the request was
+	// successful.
+	if res.StatusCode < http.StatusMultipleChoices {
+		return b, nil
 	}
 
-	return res.StatusCode, b, nil
+	// Return a generic error since we didn't receive any extra information
+	// about the error.
+	if len(b) == 0 {
+		return nil, errors.New("unsuccessful response code received",
+			j.KV("response_code", res.StatusCode))
+	}
+
+	var apiError Error
+	err = json.Unmarshal(b, &apiError)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, apiError
 }
 
-func (c *client) get(ctx context.Context, path string) (int, []byte, error) {
+func (c *client) get(ctx context.Context, path string) ([]byte, error) {
 	return c.call(ctx, http.MethodGet, path, nil)
 }
 
-func (c *client) put(ctx context.Context, path string, body []byte) (int,
-	[]byte, error) {
+func (c *client) put(ctx context.Context, path string, body []byte) ([]byte,
+	error) {
 	return c.call(ctx, http.MethodPut, path, body)
 }
 
-func (c *client) post(ctx context.Context, path string, body []byte) (int,
-	[]byte, error) {
+func (c *client) post(ctx context.Context, path string, body []byte) ([]byte,
+	error) {
 	return c.call(ctx, http.MethodPost, path, body)
 }
 
-func (c *client) delete(ctx context.Context, path string, body []byte) (int,
-	[]byte, error) {
+func (c *client) delete(ctx context.Context, path string, body []byte) ([]byte,
+	error) {
 	return c.call(ctx, http.MethodDelete, path, body)
 }
 
 // Ping tests the connectivity to the API.
 func (c *client) Ping(ctx context.Context) error {
-	_, _, err := c.get(ctx, "/ping")
+	_, err := c.get(ctx, "/ping")
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// ServerTime returns the current time on the REST API server.
+func (c *client) ServerTime(ctx context.Context) (time.Time, error) {
+	res, err := c.get(ctx, "/time")
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	timeResponse := struct {
+		Milliseconds int64 `json:"serverTime"`
+	}{}
+
+	err = json.Unmarshal(res, &timeResponse)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	return time.Unix(0, timeResponse.Milliseconds*1e6), nil
 }

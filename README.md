@@ -16,7 +16,7 @@ Contributions are welcome.
 ### Public API
 
 - [x] Ping
-- [ ] Server Time
+- [x] Server Time
 - [ ] Exchange Info
 
 ### Market Data
