@@ -102,6 +102,8 @@ func (c *client) Klines(ctx context.Context, symbol Symbol, interval Interval,
 	return klines, err
 }
 
+// KlinesBetween returns candlestick data for a Symbol between some interval
+// of time. Max limit is 1000.
 func (c *client) KlinesBetween(ctx context.Context, symbol Symbol,
 	interval Interval, from, to time.Time, limit int) ([]Kline, error) {
 	start := from.UnixNano() / 1e6
@@ -119,4 +121,21 @@ func (c *client) KlinesBetween(ctx context.Context, symbol Symbol,
 	}
 
 	return klines, err
+}
+
+// AveragePrice returns an aggregation of price movements over a period of time.
+func (c *client) AveragePrice(ctx context.Context, symbol Symbol) (*AveragePrice,
+	error) {
+	res, err := c.get(ctx, fmt.Sprintf("/avgPrice&symbol=%s",
+		symbol.String()))
+	if err != nil {
+		return nil, err
+	}
+
+	var price AveragePrice
+	if err = json.Unmarshal(res, &price); err != nil {
+		return nil, errors.Wrap(err, "failed to parse average price")
+	}
+
+	return &price, err
 }

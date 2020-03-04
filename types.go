@@ -9,6 +9,36 @@ import (
 	"github.com/luno/jettison/errors"
 )
 
+type averagePriceResponse struct {
+	Minutes int    `json:"mins"`
+	Price   string `json:"price"`
+}
+
+// AveragePrice contains the aggregation of price movements over a period of
+// time.
+type AveragePrice struct {
+	Minutes int
+	Price   float64
+}
+
+func (price *AveragePrice) UnmarshalJSON(data []byte) error {
+	var resp averagePriceResponse
+	err := json.Unmarshal(data, &resp)
+	if err != nil {
+		return err
+	}
+
+	p, err := strconv.ParseFloat(resp.Price, 64)
+	if err != nil {
+		return err
+	}
+
+	price.Minutes = resp.Minutes
+	price.Price = p
+
+	return nil
+}
+
 // Interval represents constant durations of time.
 type Interval string
 

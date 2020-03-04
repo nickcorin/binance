@@ -84,3 +84,14 @@ func TestKlinesBetween_OK(t *testing.T) {
 	require.NotNil(t, klines)
 	require.Equal(t, 1, len(klines))
 }
+
+func TestAveragePrice_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	price, err := c.AveragePrice(context.Background(), ETHBTC)
+	require.NoError(t, err)
+	require.NotNil(t, price)
+}
