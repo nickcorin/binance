@@ -1,6 +1,9 @@
 package binance
 
-import "net/http"
+import (
+	"net/http"
+	"net/url"
+)
 
 // SecurityLevel represents the required authentication a Client is required
 // to provide when sending requests.
@@ -42,51 +45,55 @@ func (level SecurityLevel) RequiresSigning() bool {
 	return level.Valid() && level >= SecurityLevelTrade
 }
 
+func getSecurityLevel(u *url.URL, method string) SecurityLevel {
+	return securityGroups[u.Path][method]
+}
+
 var securityGroups = map[string]map[string]SecurityLevel{
-	"/account": {
+	"/api/v3/account": {
 		http.MethodGet: SecurityLevelUserData,
 	},
 
-	"/allOrderList": {
+	"/api/v3/allOrderList": {
 		http.MethodGet: SecurityLevelUserData,
 	},
 
-	"/allOrders": {
+	"/api/v3/allOrders": {
 		http.MethodGet: SecurityLevelUserData,
 	},
 
-	"/historicalTrades": {
+	"/api/v3/historicalTrades": {
 		http.MethodGet: SecurityLevelMarketData,
 	},
 
-	"/myTrades": {
+	"/api/v3/myTrades": {
 		http.MethodGet: SecurityLevelUserData,
 	},
 
-	"/openOrderList": {
+	"/api/v3/openOrderList": {
 		http.MethodGet: SecurityLevelUserData,
 	},
 
-	"/openOrders": {
+	"/api/v3/openOrders": {
 		http.MethodGet: SecurityLevelUserData,
 	},
 
-	"/order": {
+	"/api/v3/order": {
 		http.MethodDelete: SecurityLevelTrade,
 		http.MethodGet:    SecurityLevelUserData,
 		http.MethodPost:   SecurityLevelTrade,
 	},
 
-	"/order/oco": {
+	"/api/v3/order/oco": {
 		http.MethodPost:   SecurityLevelTrade,
 		http.MethodDelete: SecurityLevelTrade,
 	},
 
-	"order/test": {
+	"/api/v3/order/test": {
 		http.MethodPost: SecurityLevelTrade,
 	},
 
-	"/orderList": {
+	"/api/v3/orderList": {
 		http.MethodGet: SecurityLevelUserData,
 	},
 }

@@ -37,6 +37,7 @@ func NewClient(opts ...ClientOption) Client {
 }
 
 func (c *client) setAuthHeader(r *http.Request) *http.Request {
+	log.Printf("Debug: %s", c.options.apiKey)
 	r.Header.Set("X-MBX-APIKEY", c.options.apiKey)
 	return r
 }
@@ -48,8 +49,6 @@ func (c *client) signRequest(r *http.Request, body []byte) *http.Request {
 	values := r.URL.Query()
 
 	values.Set("timestamp", fmt.Sprintf("%d", timestamp))
-	fmt.Printf("DEBUG (query): %s\n", values.Encode())
-	fmt.Printf("DEBUG (body): %s\n", body)
 	sig.Write([]byte(values.Encode()))
 	sig.Write(body)
 
@@ -79,12 +78,13 @@ func (c *client) call(ctx context.Context, method, path string,
 	// Set required headers and sign request.
 	req.Header.Set("Content-type", "application/x-www-form-urlencoded")
 
-	securityGroup := securityGroups[u.Path][method]
-	if securityGroup.RequiresAuth() {
+	securityLevel := getSecurityLevel(u, method)
+
+	if securityLevel.RequiresAuth() {
 		req = c.setAuthHeader(req)
 	}
 
-	if securityGroup.RequiresSigning() {
+	if securityLevel.RequiresSigning() {
 		req = c.signRequest(req, body)
 	}
 
