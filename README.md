@@ -29,7 +29,7 @@ Contributions are welcome.
 - [x] Current Average Price
 - [x] 24 Hour Ticker
 - [x] Price Ticker
-- [ ] Order Book Ticker
+- [x] Order Book Ticker
 
 ### Account
 
