@@ -139,3 +139,21 @@ func (c *client) AveragePrice(ctx context.Context, symbol Symbol) (*AveragePrice
 
 	return &price, err
 }
+
+// TickerStats returns 24 hour rolling price change statistics for a given
+// Symbols.
+func (c *client) TickerStats(ctx context.Context, symbol Symbol) (*TickerStats,
+	error) {
+	res, err := c.get(ctx, fmt.Sprintf("/ticker/24h?symbol=%s",
+		symbol.String()))
+	if err != nil {
+		return nil, err
+	}
+
+	var stats TickerStats
+	if err = json.Unmarshal(res, &stats); err != nil {
+		return nil, errors.Wrap(err, "failed to parse ticker stats")
+	}
+
+	return &stats, nil
+}

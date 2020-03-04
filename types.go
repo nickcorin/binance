@@ -241,6 +241,146 @@ type OrderBookEntry struct {
 	Volume float64
 }
 
+type ticketStatsResponse struct {
+	Symbol             string `json:"symbol"`
+	PriceChange        string `json:"priceChange"`
+	PriceChangePercent string `json:"priceChangePercent"`
+	WeightedAvgPrice   string `json:"weightedAvgPrice"`
+	PrevClosePrice     string `json:"prevClosePrice"`
+	LastPrice          string `json:"lastPrice"`
+	LastVolume         string `json:"lastQty"`
+	BidPrice           string `json:"bidPrice"`
+	AskPrice           string `json:"askPrice"`
+	OpenPrice          string `json:"openPrice"`
+	HighPrice          string `json:"highPrice"`
+	LowPrice           string `json:"lowPrice"`
+	Volume             string `json:"volume"`
+	QuoteVolume        string `json:"quoteVolume"`
+	OpenTime           int64  `json:"openTime"`
+	CloseTime          int64  `json:"closeTime"`
+	FirstID            int64  `json:"firstID"`
+	LastID             int64  `json:"lastID"`
+	TradeCount         int64  `json:"count"`
+}
+
+// TickerStats contains price change statistics over a 24 hour rolling window.
+type TickerStats struct {
+	Symbol             string
+	PriceChange        float64
+	PriceChangePercent float64
+	WeightedAvgPrice   float64
+	PrevClosePrice     float64
+	LastPrice          float64
+	LastVolume         float64
+	BidPrice           float64
+	AskPrice           float64
+	OpenPrice          float64
+	HighPrice          float64
+	LowPrice           float64
+	Volume             float64
+	QuoteVolume        float64
+	OpenTime           time.Time
+	CloseTime          time.Time
+	FirstID            int64
+	LastID             int64
+	TradeCount         int64
+}
+
+func (stats *TickerStats) UnmarshalJSON(data []byte) error {
+	var resp ticketStatsResponse
+	err := json.Unmarshal(data, &resp)
+	if err != nil {
+		return err
+	}
+
+	pc, err := strconv.ParseFloat(resp.PriceChange, 64)
+	if err != nil {
+		return err
+	}
+
+	pcp, err := strconv.ParseFloat(resp.PriceChangePercent, 64)
+	if err != nil {
+		return err
+	}
+
+	wap, err := strconv.ParseFloat(resp.WeightedAvgPrice, 64)
+	if err != nil {
+		return err
+	}
+
+	prevCp, err := strconv.ParseFloat(resp.PrevClosePrice, 64)
+	if err != nil {
+		return err
+	}
+
+	lp, err := strconv.ParseFloat(resp.LastPrice, 64)
+	if err != nil {
+		return err
+	}
+
+	lv, err := strconv.ParseFloat(resp.LastVolume, 64)
+	if err != nil {
+		return err
+	}
+
+	bp, err := strconv.ParseFloat(resp.BidPrice, 64)
+	if err != nil {
+		return err
+	}
+
+	ap, err := strconv.ParseFloat(resp.AskPrice, 64)
+	if err != nil {
+		return err
+	}
+
+	op, err := strconv.ParseFloat(resp.OpenPrice, 64)
+	if err != nil {
+		return err
+	}
+
+	hp, err := strconv.ParseFloat(resp.HighPrice, 64)
+	if err != nil {
+		return err
+	}
+
+	low, err := strconv.ParseFloat(resp.LowPrice, 64)
+	if err != nil {
+		return err
+	}
+
+	v, err := strconv.ParseFloat(resp.Volume, 64)
+	if err != nil {
+		return err
+	}
+
+	qv, err := strconv.ParseFloat(resp.QuoteVolume, 64)
+	if err != nil {
+		return err
+	}
+
+	stats.Symbol = resp.Symbol
+	stats.PriceChange = pc
+	stats.PriceChangePercent = pcp
+	stats.WeightedAvgPrice = wap
+	stats.PrevClosePrice = prevCp
+	stats.LastPrice = lp
+	stats.LastVolume = lv
+	stats.BidPrice = bp
+	stats.AskPrice = ap
+	stats.OpenPrice = op
+	stats.HighPrice = hp
+	stats.LowPrice = low
+	stats.Volume = v
+	stats.QuoteVolume = qv
+	stats.OpenTime = time.Unix(0, resp.OpenTime*1e6)
+	stats.CloseTime = time.Unix(0, resp.CloseTime*1e6)
+	stats.FirstID = resp.FirstID
+	stats.LastID = resp.LastID
+	stats.TradeCount = resp.TradeCount
+
+	return nil
+}
+
 type tradeResponse struct {
 	ID           int64  `json:"id"`
 	Price        string `json:"price"`

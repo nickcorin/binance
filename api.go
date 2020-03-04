@@ -15,5 +15,6 @@ type Client interface {
 	OrderBook(context.Context, Symbol, int) (*OrderBook, error)
 	Ping(context.Context) error
 	ServerTime(context.Context) (time.Time, error)
+	TickerStats(context.Context, Symbol) (*TickerStats, error)
 	RecentTrades(context.Context, Symbol, int) ([]Trade, error)
 }

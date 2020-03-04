@@ -95,3 +95,14 @@ func TestAveragePrice_OK(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, price)
 }
+
+func TestTickerStats_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	stats, err := c.TickerStats(context.Background(), ETHBTC)
+	require.NoError(t, err)
+	require.NotNil(t, stats)
+}

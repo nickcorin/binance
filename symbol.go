@@ -1,5 +1,7 @@
 package binance
 
+import "strings"
+
 //go:generate stringer -type=Symbol
 
 // Symbol represents a trading market. Created by concatenating the quote
@@ -71,4 +73,20 @@ func (s Symbol) ETHBase() bool {
 // StableBase checks if a Symbol has a base asset of some stable coin.
 func (s Symbol) StableBase() bool {
 	return s > ethSentinel && s < symbolSentinel
+}
+
+// Is compares a Symbol string to a given string and tests equality.
+func (s Symbol) Is(s2 string) bool {
+	return strings.EqualFold(s.String(), s2)
+}
+
+// IsAny compares a Symbol string to a list of strings and returns if it is
+// contained.
+func (s Symbol) IsAny(sl ...string) bool {
+	for _, s2 := range sl {
+		if s.Is(s2) {
+			return true
+		}
+	}
+	return false
 }
