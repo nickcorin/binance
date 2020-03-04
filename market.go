@@ -9,42 +9,21 @@ import (
 	"github.com/luno/jettison/errors"
 )
 
-// OrderBook returns the current state of the exchange's order book with a list
-// of bids and asks. All orders at the same price are aggreated together.
-//
-// Valid limits are 5, 10, 20, 50, 100, 500, 1000, 5000.
-func (c *client) OrderBook(ctx context.Context, symbol Symbol, limit int) (
-	*OrderBook, error) {
-	res, err := c.get(ctx, fmt.Sprintf("/depth?symbol=%s&limit=%d",
-		symbol.String(), limit))
+// AveragePrice returns an aggregation of price movements over a period of time.
+func (c *client) AveragePrice(ctx context.Context, symbol Symbol) (*AveragePrice,
+	error) {
+	res, err := c.get(ctx, fmt.Sprintf("/avgPrice&symbol=%s",
+		symbol.String()))
 	if err != nil {
 		return nil, err
 	}
 
-	var book OrderBook
-	if err = json.Unmarshal(res, &book); err != nil {
-		return nil, errors.Wrap(err, "failed to parse order book")
+	var price AveragePrice
+	if err = json.Unmarshal(res, &price); err != nil {
+		return nil, errors.Wrap(err, "failed to parse average price")
 	}
 
-	return &book, nil
-}
-
-// Recent trades returns a list of recent trades executed on the exchange. Max
-// limit is 1000.
-func (c *client) RecentTrades(ctx context.Context, symbol Symbol, limit int) (
-	[]Trade, error) {
-	res, err := c.get(ctx, fmt.Sprintf("/trades?symbol=%s&limit=%d",
-		symbol.String(), limit))
-	if err != nil {
-		return nil, err
-	}
-
-	var trades []Trade
-	if err = json.Unmarshal(res, &trades); err != nil {
-		return nil, errors.Wrap(err, "failed to parse trades")
-	}
-
-	return trades, nil
+	return &price, err
 }
 
 // HistoricalTrades returns a historical list of trades executed on the
@@ -123,21 +102,74 @@ func (c *client) KlinesBetween(ctx context.Context, symbol Symbol,
 	return klines, err
 }
 
-// AveragePrice returns an aggregation of price movements over a period of time.
-func (c *client) AveragePrice(ctx context.Context, symbol Symbol) (*AveragePrice,
-	error) {
-	res, err := c.get(ctx, fmt.Sprintf("/avgPrice&symbol=%s",
+// PriceTicker returns the latest price tickers for all Symbols.
+func (c *client) ListPriceTickers(ctx context.Context) (
+	[]PriceTicker, error) {
+	res, err := c.get(ctx, "/ticker/price")
+	if err != nil {
+		return nil, err
+	}
+
+	var tickers []PriceTicker
+	if err = json.Unmarshal(res, &tickers); err != nil {
+		return nil, errors.Wrap(err, "failed to parse price ticker")
+	}
+
+	return tickers, nil
+}
+
+// ListTickerStats returns 24 hour rolling price change statistics for all
+// Symbols.
+func (c *client) ListTickerStats(ctx context.Context) (
+	[]TickerStats, error) {
+	res, err := c.get(ctx, "/ticker/24h")
+	if err != nil {
+		return nil, err
+	}
+
+	var stats []TickerStats
+	if err = json.Unmarshal(res, &stats); err != nil {
+		return nil, errors.Wrap(err, "failed to parse ticker stats")
+	}
+
+	return stats, nil
+}
+
+// OrderBook returns the current state of the exchange's order book with a list
+// of bids and asks. All orders at the same price are aggreated together.
+//
+// Valid limits are 5, 10, 20, 50, 100, 500, 1000, 5000.
+func (c *client) OrderBook(ctx context.Context, symbol Symbol, limit int) (
+	*OrderBook, error) {
+	res, err := c.get(ctx, fmt.Sprintf("/depth?symbol=%s&limit=%d",
+		symbol.String(), limit))
+	if err != nil {
+		return nil, err
+	}
+
+	var book OrderBook
+	if err = json.Unmarshal(res, &book); err != nil {
+		return nil, errors.Wrap(err, "failed to parse order book")
+	}
+
+	return &book, nil
+}
+
+// PriceTicker returns the latest price for a given Symbol.
+func (c *client) PriceTicker(ctx context.Context, symbol Symbol) (
+	*PriceTicker, error) {
+	res, err := c.get(ctx, fmt.Sprintf("/ticker/price?symbol=%s",
 		symbol.String()))
 	if err != nil {
 		return nil, err
 	}
 
-	var price AveragePrice
-	if err = json.Unmarshal(res, &price); err != nil {
-		return nil, errors.Wrap(err, "failed to parse average price")
+	var ticker PriceTicker
+	if err = json.Unmarshal(res, &ticker); err != nil {
+		return nil, errors.Wrap(err, "failed to parse price ticker")
 	}
 
-	return &price, err
+	return &ticker, nil
 }
 
 // TickerStats returns 24 hour rolling price change statistics for a given
@@ -158,19 +190,20 @@ func (c *client) TickerStats(ctx context.Context, symbol Symbol) (*TickerStats,
 	return &stats, nil
 }
 
-// ListTickerStats returns 24 hour rolling price change statistics for all
-// Symbols.
-func (c *client) ListTickerStats(ctx context.Context) (
-	[]TickerStats, error) {
-	res, err := c.get(ctx, "/ticker/24h")
+// Recent trades returns a list of recent trades executed on the exchange. Max
+// limit is 1000.
+func (c *client) RecentTrades(ctx context.Context, symbol Symbol, limit int) (
+	[]Trade, error) {
+	res, err := c.get(ctx, fmt.Sprintf("/trades?symbol=%s&limit=%d",
+		symbol.String(), limit))
 	if err != nil {
 		return nil, err
 	}
 
-	var stats []TickerStats
-	if err = json.Unmarshal(res, &stats); err != nil {
-		return nil, errors.Wrap(err, "failed to parse ticker stats")
+	var trades []Trade
+	if err = json.Unmarshal(res, &trades); err != nil {
+		return nil, errors.Wrap(err, "failed to parse trades")
 	}
 
-	return stats, nil
+	return trades, nil
 }

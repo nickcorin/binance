@@ -28,7 +28,7 @@ Contributions are welcome.
 - [x] Kline / Candlestick Data
 - [x] Current Average Price
 - [x] 24 Hour Ticker
-- [ ] Price Ticker
+- [x] Price Ticker
 - [ ] Order Book Ticker
 
 ### Account

@@ -241,6 +241,35 @@ type OrderBookEntry struct {
 	Volume float64
 }
 
+type priceTickerResponse struct {
+	Symbol string `json:"symbol"`
+	Price  string `json:"price"`
+}
+
+// PriceTicker contains the a price for a Symbol.
+type PriceTicker struct {
+	Symbol string
+	Price  float64
+}
+
+func (ticker *PriceTicker) UnmarshalJSON(data []byte) error {
+	var resp priceTickerResponse
+	err := json.Unmarshal(data, &resp)
+	if err != nil {
+		return err
+	}
+
+	p, err := strconv.ParseFloat(resp.Price, 64)
+	if err != nil {
+		return err
+	}
+
+	ticker.Symbol = resp.Symbol
+	ticker.Price = p
+
+	return nil
+}
+
 type ticketStatsResponse struct {
 	Symbol             string `json:"symbol"`
 	PriceChange        string `json:"priceChange"`
