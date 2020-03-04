@@ -141,3 +141,26 @@ func TestListPriceTickers_OK(t *testing.T) {
 	require.NotNil(t, tickers)
 	require.Equal(t, 2, len(tickers))
 }
+
+func TestOrderBookTicker_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	ticker, err := c.OrderBookTicker(context.Background(), ETHBTC)
+	require.NoError(t, err)
+	require.NotNil(t, ticker)
+}
+
+func TestListOrderBookTickers_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	tickers, err := c.ListOrderBookTickers(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, tickers)
+	require.Equal(t, 2, len(tickers))
+}

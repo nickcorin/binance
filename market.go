@@ -102,6 +102,23 @@ func (c *client) KlinesBetween(ctx context.Context, symbol Symbol,
 	return klines, err
 }
 
+// ListOrderBookTickers returns the current best bid and ask prices for all
+// Symbols.
+func (c *client) ListOrderBookTickers(ctx context.Context) (
+	[]OrderBookTicker, error) {
+	res, err := c.get(ctx, "/ticker/bookTicker")
+	if err != nil {
+		return nil, err
+	}
+
+	var tickers []OrderBookTicker
+	if err = json.Unmarshal(res, &tickers); err != nil {
+		return nil, errors.Wrap(err, "failed to parse order book tickers")
+	}
+
+	return tickers, nil
+}
+
 // PriceTicker returns the latest price tickers for all Symbols.
 func (c *client) ListPriceTickers(ctx context.Context) (
 	[]PriceTicker, error) {
@@ -153,6 +170,23 @@ func (c *client) OrderBook(ctx context.Context, symbol Symbol, limit int) (
 	}
 
 	return &book, nil
+}
+
+// OrderBookTicker returns the current best bid and ask price for a Symbol.
+func (c *client) OrderBookTicker(ctx context.Context, symbol Symbol) (
+	*OrderBookTicker, error) {
+	res, err := c.get(ctx, fmt.Sprintf("/ticker/bookTicker?symbol=%s",
+		symbol.String()))
+	if err != nil {
+		return nil, err
+	}
+
+	var ticker OrderBookTicker
+	if err = json.Unmarshal(res, &ticker); err != nil {
+		return nil, errors.Wrap(err, "failed to parse order book ticker")
+	}
+
+	return &ticker, nil
 }
 
 // PriceTicker returns the latest price for a given Symbol.
