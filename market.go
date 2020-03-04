@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/luno/jettison/errors"
 )
@@ -81,4 +82,41 @@ func (c *client) HistoricalTradesFrom(ctx context.Context, symbol Symbol,
 	}
 
 	return trades, err
+}
+
+// Klines returns candlestick data for a Symbol. Max limit is 1000.
+func (c *client) Klines(ctx context.Context, symbol Symbol, interval Interval,
+	limit int) ([]Kline, error) {
+	res, err := c.get(ctx,
+		fmt.Sprintf("/klines?symbol=%s&interval=%s&limit=%d",
+			symbol.String(), interval, limit))
+	if err != nil {
+		return nil, err
+	}
+
+	var klines []Kline
+	if err = json.Unmarshal(res, &klines); err != nil {
+		return nil, errors.Wrap(err, "failed to parse klines")
+	}
+
+	return klines, err
+}
+
+func (c *client) KlinesBetween(ctx context.Context, symbol Symbol,
+	interval Interval, from, to time.Time, limit int) ([]Kline, error) {
+	start := from.UnixNano() / 1e6
+	end := to.UnixNano() / 1e6
+	res, err := c.get(ctx,
+		fmt.Sprintf("/klines?symbol=%s&interval=%s&limit=%d&startTime=%d&endTime=%d",
+			symbol.String(), interval, limit, start, end))
+	if err != nil {
+		return nil, err
+	}
+
+	var klines []Kline
+	if err = json.Unmarshal(res, &klines); err != nil {
+		return nil, errors.Wrap(err, "failed to parse klines")
+	}
+
+	return klines, err
 }

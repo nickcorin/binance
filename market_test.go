@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -57,4 +58,29 @@ func TestHistoricalTrades_OK(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, trades)
 	require.Equal(t, 1, len(trades))
+}
+
+func TestKlines_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	klines, err := c.Klines(context.Background(), ETHBTC, Minute, 10)
+	require.NoError(t, err)
+	require.NotNil(t, klines)
+	require.Equal(t, 1, len(klines))
+}
+
+func TestKlinesBetween_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	klines, err := c.KlinesBetween(context.Background(), ETHBTC, Minute,
+		time.Now().Add(-1*time.Hour*24), time.Now(), 10)
+	require.NoError(t, err)
+	require.NotNil(t, klines)
+	require.Equal(t, 1, len(klines))
 }

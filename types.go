@@ -2,8 +2,11 @@ package binance
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/luno/jettison/errors"
 )
 
 // Interval represents constant durations of time.
@@ -26,6 +29,128 @@ const (
 	Week           Interval = "1w"
 	Month          Interval = "1M"
 )
+
+type klineResponse []interface{}
+
+// Kline contains candlestick data over a period of time.
+type Kline struct {
+	OpenTime    time.Time
+	Open        float64
+	High        float64
+	Low         float64
+	Close       float64
+	Volume      float64
+	CloseTime   time.Time
+	QuoteVolume float64
+	TradeCount  int64
+}
+
+func (k *Kline) UnmarshalJSON(data []byte) error {
+	var resp klineResponse
+	err := json.Unmarshal(data, &resp)
+	if err != nil {
+		return err
+	}
+
+	// Note: JSON numbers are treated at floats. Large numbers (outside of
+	// the int32 range) will fail to be type asserted to int64 because of
+	// scientific notation. A way around this is to type assert into a
+	// float64 and cast with int64(...).
+	ot, ok := resp[0].(float64)
+	if !ok {
+		return errors.New(fmt.Sprintf("got data of type %T (%v), wanted float64",
+			resp[0], resp[0]))
+	}
+
+	oString, ok := resp[1].(string)
+	if !ok {
+		return errors.New(fmt.Sprintf("got data of type %T (%v), wanted string",
+			resp[1], resp[1]))
+	}
+
+	o, err := strconv.ParseFloat(oString, 64)
+	if err != nil {
+		return err
+	}
+
+	hString, ok := resp[2].(string)
+	if !ok {
+		return errors.New(fmt.Sprintf("got data of type %T (%v), wanted string",
+			resp[2], resp[2]))
+	}
+
+	h, err := strconv.ParseFloat(hString, 64)
+	if err != nil {
+		return err
+	}
+
+	lString, ok := resp[3].(string)
+	if !ok {
+		return errors.New(fmt.Sprintf("got data of type %T (%v), wanted string",
+			resp[3], resp[3]))
+	}
+
+	l, err := strconv.ParseFloat(lString, 64)
+	if err != nil {
+		return err
+	}
+
+	cString, ok := resp[4].(string)
+	if !ok {
+		return errors.New(fmt.Sprintf("got data of type %T (%v), wanted string",
+			resp[4], resp[4]))
+	}
+
+	c, err := strconv.ParseFloat(cString, 64)
+	if err != nil {
+		return err
+	}
+
+	vString, ok := resp[5].(string)
+	if !ok {
+		return errors.New(fmt.Sprintf("got data of type %T (%v), wanted string",
+			resp[5], resp[5]))
+	}
+
+	v, err := strconv.ParseFloat(vString, 64)
+	if err != nil {
+		return err
+	}
+
+	ct, ok := resp[6].(float64)
+	if !ok {
+		return errors.New(fmt.Sprintf("got data of type %T (%v) for , wanted float64",
+			resp[6], resp[6]))
+	}
+
+	qvString, ok := resp[7].(string)
+	if !ok {
+		return errors.New(fmt.Sprintf("got data of type %T (%v), wanted string",
+			resp[7], resp[7]))
+	}
+
+	qv, err := strconv.ParseFloat(qvString, 64)
+	if err != nil {
+		return err
+	}
+
+	tc, ok := resp[8].(float64)
+	if !ok {
+		return errors.New(fmt.Sprintf("got data of type %T (%v) for trade count, wanted float64",
+			resp[8], resp[8]))
+	}
+
+	k.OpenTime = time.Unix(0, int64(ot)*1e6)
+	k.Open = o
+	k.High = h
+	k.Low = l
+	k.Close = c
+	k.Volume = v
+	k.CloseTime = time.Unix(0, int64(ct)*1e6)
+	k.QuoteVolume = qv
+	k.TradeCount = int64(tc)
+	return nil
+}
 
 type orderBookResponse struct {
 	LastUpdateID int64      `json:"lastUpdateId"`
