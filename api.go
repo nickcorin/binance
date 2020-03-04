@@ -12,6 +12,7 @@ type Client interface {
 	HistoricalTradesFrom(context.Context, Symbol, int, int64) ([]Trade, error)
 	Klines(context.Context, Symbol, Interval, int) ([]Kline, error)
 	KlinesBetween(context.Context, Symbol, Interval, time.Time, time.Time, int) ([]Kline, error)
+	ListTickerStats(context.Context) ([]TickerStats, error)
 	OrderBook(context.Context, Symbol, int) (*OrderBook, error)
 	Ping(context.Context) error
 	ServerTime(context.Context) (time.Time, error)

@@ -106,3 +106,15 @@ func TestTickerStats_OK(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, stats)
 }
+
+func TestListTickerStats_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	stats, err := c.ListTickerStats(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, stats)
+	require.Equal(t, 1, len(stats))
+}
