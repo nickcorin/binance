@@ -62,12 +62,17 @@ func (c *client) call(ctx context.Context, method, path string,
 
 	// Add useful data into the context to be included in logs.
 	ctx = log.ContextWith(ctx, j.MKV{"method": method, "path": path})
-
 	u, err := url.ParseRequestURI(fmt.Sprintf("%s%s", c.options.baseURL,
 		path))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse uri")
 	}
+
+	// Add receive window to requests.
+	values := u.Query()
+	values.Set("recvWindow",
+		fmt.Sprintf("%d", c.options.receiveWindow.Milliseconds()))
+	u.RawQuery = values.Encode()
 
 	req, err := http.NewRequestWithContext(ctx, method, u.String(),
 		bytes.NewBuffer(body))
