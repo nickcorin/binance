@@ -9,6 +9,59 @@ import (
 	"github.com/luno/jettison/errors"
 )
 
+type aggregateTradeResponse struct {
+	ID           int64  `json:"a"`
+	Price        string `json:"p"`
+	Volume       string `json:"q"`
+	FirstTrade   int64  `json:"f"`
+	LastTrade    int64  `json:"l"`
+	Timestamp    int64  `json:"T"`
+	IsBuyerMaker bool   `json:"m"`
+	IsBestMatch  bool   `json:"M"`
+}
+
+// AggregateTrade contains compressed trade data that filled at the same time,
+// as part of the same order, with the same price.
+type AggregateTrade struct {
+	ID           int64
+	Price        float64
+	Volume       float64
+	FirstTrade   int64
+	LastTrade    int64
+	Timestamp    time.Time
+	IsBuyerMaker bool
+	IsBestMatch  bool
+}
+
+func (trade *AggregateTrade) UnmarshalJSON(data []byte) error {
+	var resp aggregateTradeResponse
+	err := json.Unmarshal(data, &resp)
+	if err != nil {
+		return err
+	}
+
+	p, err := strconv.ParseFloat(resp.Price, 64)
+	if err != nil {
+		return err
+	}
+
+	v, err := strconv.ParseFloat(resp.Volume, 64)
+	if err != nil {
+		return err
+	}
+
+	trade.ID = resp.ID
+	trade.Price = p
+	trade.Volume = v
+	trade.FirstTrade = resp.FirstTrade
+	trade.LastTrade = resp.LastTrade
+	trade.Timestamp = time.Unix(0, resp.Timestamp*1e6)
+	trade.IsBuyerMaker = resp.IsBuyerMaker
+	trade.IsBestMatch = resp.IsBestMatch
+
+	return nil
+}
+
 type averagePriceResponse struct {
 	Minutes int    `json:"mins"`
 	Price   string `json:"price"`

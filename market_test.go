@@ -164,3 +164,54 @@ func TestListOrderBookTickers_OK(t *testing.T) {
 	require.NotNil(t, tickers)
 	require.Equal(t, 2, len(tickers))
 }
+
+func TestAggregateTrades_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	trades, err := c.AggregateTrades(context.Background(), ETHBTC, 10)
+	require.NoError(t, err)
+	require.NotNil(t, trades)
+	require.Equal(t, 1, len(trades))
+}
+
+func TestAggregateTradesAfter_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	trades, err := c.AggregateTradesAfter(context.Background(), ETHBTC,
+		time.Now(), 10)
+	require.NoError(t, err)
+	require.NotNil(t, trades)
+	require.Equal(t, 1, len(trades))
+}
+
+func TestAggregateTradesBetween_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	trades, err := c.AggregateTradesBetween(context.Background(), ETHBTC,
+		time.Now().Add(-1*time.Hour*24), time.Now(), 10)
+	require.NoError(t, err)
+	require.NotNil(t, trades)
+	require.Equal(t, 1, len(trades))
+}
+
+func TestAggregateTradesFrom_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	trades, err := c.AggregateTradesFrom(context.Background(), ETHBTC, 1234,
+		10)
+	require.NoError(t, err)
+	require.NotNil(t, trades)
+	require.Equal(t, 1, len(trades))
+}

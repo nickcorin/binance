@@ -9,6 +9,88 @@ import (
 	"github.com/luno/jettison/errors"
 )
 
+// AggregateTrades returns a list of the most recent trades. Trades are
+// aggregated if they were executed as part of the same order, at the same time
+// and for the same price for a given Symbol. Max limit is 1000.
+func (c *client) AggregateTrades(ctx context.Context, symbol Symbol,
+	limit int) ([]AggregateTrade, error) {
+	res, err := c.get(ctx, fmt.Sprintf("/aggTrades?symbol=%s&limit=%d",
+		symbol.String(), limit))
+	if err != nil {
+		return nil, err
+	}
+
+	var trades []AggregateTrade
+	if err = json.Unmarshal(res, &trades); err != nil {
+		return nil, errors.Wrap(err, "failed to parse aggregate trades")
+	}
+
+	return trades, err
+}
+
+// AggregateTradesAfter returns a list of trades that executed after a given
+// time inclusive. Trades are aggregated if they were executed as part of the
+// same order, at the same time and for the same price for a given Symbol. Max
+// limit is 1000.
+func (c *client) AggregateTradesAfter(ctx context.Context, symbol Symbol,
+	from time.Time, limit int) ([]AggregateTrade, error) {
+	res, err := c.get(ctx,
+		fmt.Sprintf("/aggTrades?symbol=%s&startTime=%d&limit=%d",
+			symbol.String(), from.UnixNano()/1e6, limit))
+	if err != nil {
+		return nil, err
+	}
+
+	var trades []AggregateTrade
+	if err = json.Unmarshal(res, &trades); err != nil {
+		return nil, errors.Wrap(err, "failed to parse aggregate trades")
+	}
+
+	return trades, nil
+}
+
+// AggregateTradesBetween returns a list of trades that executed between a
+// given time interval inclusive. Trades are aggregated if they were executed
+// as part of the same order, at the same time and for the same price for a
+// given Symbol. Max limit is 1000.
+func (c *client) AggregateTradesBetween(ctx context.Context, symbol Symbol,
+	from time.Time, to time.Time, limit int) ([]AggregateTrade, error) {
+	res, err := c.get(ctx,
+		fmt.Sprintf("/aggTrades?symbol=%s&startTime=%d&endTime=%d&limit=%d",
+			symbol.String(), from.UnixNano()/1e6, to.UnixNano()/1e6, limit))
+	if err != nil {
+		return nil, err
+	}
+
+	var trades []AggregateTrade
+	if err = json.Unmarshal(res, &trades); err != nil {
+		return nil, errors.Wrap(err, "failed to parse aggregate trades")
+	}
+
+	return trades, nil
+}
+
+// AggregateTradesFrom returns a list of trades that executed after a given
+// trade ID inclusive. Trades are aggregated if they were executed as part of
+// the same order, at the same time and for the same price for a given Symbol.
+// Max limit is 1000.
+func (c *client) AggregateTradesFrom(ctx context.Context, symbol Symbol,
+	from int64, limit int) ([]AggregateTrade, error) {
+	res, err := c.get(ctx,
+		fmt.Sprintf("/aggTrades?symbol=%s&fromId=%d&limit=%d",
+			symbol.String(), from, limit))
+	if err != nil {
+		return nil, err
+	}
+
+	var trades []AggregateTrade
+	if err = json.Unmarshal(res, &trades); err != nil {
+		return nil, errors.Wrap(err, "failed to parse aggregate trades")
+	}
+
+	return trades, nil
+}
+
 // AveragePrice returns an aggregation of price movements over a period of time.
 func (c *client) AveragePrice(ctx context.Context, symbol Symbol) (*AveragePrice,
 	error) {
