@@ -12,6 +12,32 @@ The package is incomplete and not fully tested. I am following the API documenta
 
 Contributions are welcome.
 
+## Example Usage
+
+```go
+import (
+	"github.com/nickcorin/binance"
+)
+
+func main() {
+	// Create a new client with an API Key and Secret Key.
+	client := binance.NewClient(WithAPIKey("MyKey"), WithSecretKey("MySecret"))
+
+	// Fetch your account information.
+	info, err := client.AccountInfo(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Fetch the latest candlestick data.
+	klines, err := client.Klines(context.Background(), binance.ETHBTC,
+		binance.FiveMinutes, 10)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+```
+
 ## Supported Endpoints
 ### Public API
 
