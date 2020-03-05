@@ -9,6 +9,20 @@ import (
 	"github.com/luno/jettison/errors"
 )
 
+// AccountInfo contains all information pertaining to a user's account.
+type AccountInfo struct {
+	MakerCommission  int       `json:"makerCommission"`
+	TakerCommission  int       `json:"takerCommission"`
+	BuyerCommission  int       `json:"buyerCommission"`
+	SellerCommission int       `json:"sellerCommission"`
+	CanTrade         bool      `json:"canTrade"`
+	CanWithdraw      bool      `json:"canWithdraw"`
+	CanDeposit       bool      `json:"canDesposit"`
+	UpdateTime       int64     `json:"updateTime"`
+	AccountType      string    `json:"accountType"`
+	Balances         []Balance `json:"balances"`
+}
+
 type aggregateTradeResponse struct {
 	ID           int64  `json:"a"`
 	Price        string `json:"p"`
@@ -88,6 +102,43 @@ func (price *AveragePrice) UnmarshalJSON(data []byte) error {
 
 	price.Minutes = resp.Minutes
 	price.Price = p
+
+	return nil
+}
+
+type balanceResponse struct {
+	Asset  string `json:"asset"`
+	Free   string `json:"free"`
+	Locked string `json:"locked"`
+}
+
+type Balance struct {
+	Asset  string
+	Free   float64
+	Locked float64
+}
+
+// Balance contains the amount breakdown of a given asset in your wallet.
+func (b *Balance) UnmarshalJSON(data []byte) error {
+	var resp balanceResponse
+	err := json.Unmarshal(data, &resp)
+	if err != nil {
+		return err
+	}
+
+	f, err := strconv.ParseFloat(resp.Free, 64)
+	if err != nil {
+		return err
+	}
+
+	l, err := strconv.ParseFloat(resp.Locked, 64)
+	if err != nil {
+		return err
+	}
+
+	b.Asset = resp.Asset
+	b.Free = f
+	b.Locked = l
 
 	return nil
 }

@@ -9,6 +9,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestAccountInfo_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	info, err := c.AccountInfo(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, info)
+	require.NotNil(t, info.Balances)
+	require.Equal(t, 2, len(info.Balances))
+}
+
 func TestOrderBook_OK(t *testing.T) {
 	srv, err := createTestServer(t, http.StatusOK)
 	require.NoError(t, err)

@@ -7,6 +7,7 @@ import (
 
 // Client provides the methods relating to Binance's REST API.
 type Client interface {
+	AccountInfo(context.Context) (*AccountInfo, error)
 	AggregateTrades(context.Context, Symbol, int) ([]AggregateTrade, error)
 	AggregateTradesAfter(context.Context, Symbol, time.Time, int) ([]AggregateTrade, error)
 	AggregateTradesBetween(context.Context, Symbol, time.Time, time.Time, int) ([]AggregateTrade, error)

@@ -9,6 +9,21 @@ import (
 	"github.com/luno/jettison/errors"
 )
 
+// AccountInfo returns all information and balances for a user account.
+func (c *client) AccountInfo(ctx context.Context) (*AccountInfo, error) {
+	res, err := c.get(ctx, "/account")
+	if err != nil {
+		return nil, err
+	}
+
+	var info AccountInfo
+	if err = json.Unmarshal(res, &info); err != nil {
+		return nil, errors.Wrap(err, "failed to parse account info")
+	}
+
+	return &info, err
+}
+
 // AggregateTrades returns a list of the most recent trades. Trades are
 // aggregated if they were executed as part of the same order, at the same time
 // and for the same price for a given Symbol. Max limit is 1000.
