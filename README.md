@@ -44,5 +44,5 @@ Contributions are welcome.
 - [ ] Query OCO
 - [ ] Query All OCO
 - [ ] Query Open OCO
-- [ ] Account Info
+- [x] Account Info
 - [ ] Account Trade List
