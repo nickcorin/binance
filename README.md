@@ -21,7 +21,10 @@ import (
 
 func main() {
 	// Create a new client with an API Key and Secret Key.
-	client := binance.NewClient(WithAPIKey("MyKey"), WithSecretKey("MySecret"))
+	client := binance.NewClient(
+		binance.WithAPIKey("MyKey"),
+		binance.WithSecretKey("MySecret"),
+	)
 
 	// Fetch your account information.
 	info, err := client.AccountInfo(context.Background())
@@ -29,7 +32,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Fetch the latest candlestick data.
+	// Fetch the most recent candlesticks.
 	klines, err := client.Klines(context.Background(), binance.ETHBTC,
 		binance.FiveMinutes, 10)
 	if err != nil {
