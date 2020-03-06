@@ -201,16 +201,42 @@ func (c *client) KlinesBetween(ctx context.Context, symbol Symbol,
 	return klines, err
 }
 
+// LimitMaker places a limit order that is rejected if it would not otherwise
+// execute immediately.
+func (c *client) LimitMaker(ctx context.Context, symbol Symbol, side Side,
+	volume, price float64) (*OrderAck, error) {
+
+	payload := make(url.Values)
+	payload.Set("symbol", symbol.String())
+	payload.Set("side", string(side))
+	payload.Set("type", string(OrderTypeLimitMaker))
+	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
+	payload.Set("price", strconv.FormatFloat(price, 'f', -1, 64))
+	payload.Set("newOrderRespType", string(OrderResponseTypeAck))
+
+	res, err := c.post(ctx, "/order", []byte(payload.Encode()))
+	if err != nil {
+		return nil, err
+	}
+
+	var ack OrderAck
+	if err = json.Unmarshal(res, &ack); err != nil {
+		return nil, errors.Wrap(err, "failed to parse order ack")
+	}
+
+	return &ack, nil
+}
+
 // LimitOrder places a limit order on the exchange.
 func (c *client) LimitOrder(ctx context.Context, symbol Symbol, side Side,
-	v, p float64, tif TimeInForce) (*OrderAck, error) {
+	volume, price float64, tif TimeInForce) (*OrderAck, error) {
 
 	payload := make(url.Values)
 	payload.Set("symbol", symbol.String())
 	payload.Set("side", string(side))
 	payload.Set("type", string(OrderTypeLimit))
-	payload.Set("quatity", strconv.FormatFloat(v, 'f', -1, 64))
-	payload.Set("price", strconv.FormatFloat(v, 'f', -1, 64))
+	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
+	payload.Set("price", strconv.FormatFloat(price, 'f', -1, 64))
 	payload.Set("timeInForce", string(tif))
 	payload.Set("newOrderRespType", string(OrderResponseTypeAck))
 
@@ -384,15 +410,16 @@ func (c *client) PriceTicker(ctx context.Context, symbol Symbol) (
 
 // StopLossLimitOrder creates a new stop loss limit order where a limit order
 // is created at a price if the market price drops below the stop price.
-func (c *client) StopLossLimitOrder(ctx context.Context, symbol Symbol, v,
-	price, stopPrice float64, tif TimeInForce) (*OrderAck, error) {
+func (c *client) StopLossLimitOrder(ctx context.Context, symbol Symbol,
+	side Side, volume, price, stopPrice float64, tif TimeInForce) (
+	*OrderAck, error) {
 
 	payload := make(url.Values)
 	payload.Set("symbol", symbol.String())
-	payload.Set("side", string(Sell))
+	payload.Set("side", string(side))
 	payload.Set("type", string(OrderTypeStopLossLimit))
-	payload.Set("quantity", strconv.FormatFloat(v, 'f', -1, 64))
-	payload.Set("price", strconv.FormatFloat(v, 'f', -1, 64))
+	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
+	payload.Set("price", strconv.FormatFloat(price, 'f', -1, 64))
 	payload.Set("stopPrice", strconv.FormatFloat(stopPrice, 'f', -1, 64))
 	payload.Set("timeInForce", string(tif))
 	payload.Set("newOrderRespType", string(OrderResponseTypeAck))
@@ -410,17 +437,17 @@ func (c *client) StopLossLimitOrder(ctx context.Context, symbol Symbol, v,
 	return &ack, nil
 }
 
-// StopLossOrder creates a new stop loss order where a market order it created
-// if the market price drops below the stop price.
-func (c *client) StopLossOrder(ctx context.Context, symbol Symbol, v,
-	p float64) (*OrderAck, error) {
+// StopLossOrder creates a new stop loss order where a market order is created
+// if the market price drops below or rises above the stop price.
+func (c *client) StopLossOrder(ctx context.Context, symbol Symbol, side Side,
+	volume, stopPrice float64) (*OrderAck, error) {
 
 	payload := make(url.Values)
 	payload.Set("symbol", symbol.String())
-	payload.Set("side", string(Sell))
+	payload.Set("side", string(side))
 	payload.Set("type", string(OrderTypeStopLoss))
-	payload.Set("quantity", strconv.FormatFloat(v, 'f', -1, 64))
-	payload.Set("stopPrice", strconv.FormatFloat(p, 'f', -1, 64))
+	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
+	payload.Set("stopPrice", strconv.FormatFloat(stopPrice, 'f', -1, 64))
 	payload.Set("newOrderRespType", string(OrderResponseTypeAck))
 
 	res, err := c.post(ctx, "/order", []byte(payload.Encode()))
@@ -431,6 +458,61 @@ func (c *client) StopLossOrder(ctx context.Context, symbol Symbol, v,
 	var ack OrderAck
 	if err = json.Unmarshal(res, &ack); err != nil {
 		return nil, err
+	}
+
+	return &ack, nil
+}
+
+// TakeProfitLimitOrder creates a new take profit order where a limit order is
+// created if the market price drops below or rises above the stop price.
+func (c *client) TakeProfitLimitOrder(ctx context.Context, symbol Symbol,
+	side Side, volume, price float64, stopPrice float64, tif TimeInForce) (
+	*OrderAck, error) {
+
+	payload := make(url.Values)
+	payload.Set("symbol", symbol.String())
+	payload.Set("side", string(side))
+	payload.Set("type", string(OrderTypeTakeProfit))
+	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
+	payload.Set("price", strconv.FormatFloat(price, 'f', -1, 64))
+	payload.Set("stopPrice", strconv.FormatFloat(stopPrice, 'f', -1, 64))
+	payload.Set("timeInForce", string(tif))
+	payload.Set("newOrderRespType", string(OrderResponseTypeAck))
+
+	res, err := c.post(ctx, "/order", []byte(payload.Encode()))
+	if err != nil {
+		return nil, err
+	}
+
+	var ack OrderAck
+	if err = json.Unmarshal(res, &ack); err != nil {
+		return nil, errors.Wrap(err, "failed to parse order ack")
+	}
+
+	return &ack, nil
+}
+
+// TakeProfitOrder creates a new take profit order where a market order is
+// created if the market price drops below or rises above the stop price.
+func (c *client) TakeProfitOrder(ctx context.Context, symbol Symbol, side Side,
+	volume, stopPrice float64) (*OrderAck, error) {
+
+	payload := make(url.Values)
+	payload.Set("symbol", symbol.String())
+	payload.Set("side", string(side))
+	payload.Set("type", string(OrderTypeTakeProfit))
+	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
+	payload.Set("stopPrice", strconv.FormatFloat(stopPrice, 'f', -1, 64))
+	payload.Set("newOrderRespType", string(OrderResponseTypeAck))
+
+	res, err := c.post(ctx, "/order", []byte(payload.Encode()))
+	if err != nil {
+		return nil, err
+	}
+
+	var ack OrderAck
+	if err = json.Unmarshal(res, &ack); err != nil {
+		return nil, errors.Wrap(err, "failed to parse order ack")
 	}
 
 	return &ack, nil

@@ -269,7 +269,7 @@ func TestStopLossLimitOrder_OK(t *testing.T) {
 	defer srv.Close()
 
 	c := NewClient(WithBaseURL(srv.URL))
-	ack, err := c.StopLossLimitOrder(context.Background(), ETHBTC, 0.1,
+	ack, err := c.StopLossLimitOrder(context.Background(), ETHBTC, Buy, 0.1,
 		0.34, 0.34, GoodUntilCancelled)
 	require.NoError(t, err)
 	require.NotNil(t, ack)
@@ -281,8 +281,43 @@ func TestStopLossOrder_OK(t *testing.T) {
 	defer srv.Close()
 
 	c := NewClient(WithBaseURL(srv.URL))
-	ack, err := c.StopLossOrder(context.Background(), ETHBTC, 0.1,
+	ack, err := c.StopLossOrder(context.Background(), ETHBTC, Buy, 0.1,
 		0.34)
+	require.NoError(t, err)
+	require.NotNil(t, ack)
+}
+
+func TestTakeProfitOrder_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	ack, err := c.TakeProfitOrder(context.Background(), ETHBTC, Buy, 0.1,
+		0.34)
+	require.NoError(t, err)
+	require.NotNil(t, ack)
+}
+
+func TestTakeProfitLimitOrder_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	ack, err := c.TakeProfitLimitOrder(context.Background(), ETHBTC, Buy,
+		0.1, 0.34, 0.34, GoodUntilCancelled)
+	require.NoError(t, err)
+	require.NotNil(t, ack)
+}
+
+func TestLimitMaker_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	ack, err := c.LimitMaker(context.Background(), ETHBTC, Buy, 0.1, 0.34)
 	require.NoError(t, err)
 	require.NotNil(t, ack)
 }

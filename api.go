@@ -17,6 +17,7 @@ type Client interface {
 	HistoricalTradesFrom(context.Context, Symbol, int, int64) ([]Trade, error)
 	Klines(context.Context, Symbol, Interval, int) ([]Kline, error)
 	KlinesBetween(context.Context, Symbol, Interval, time.Time, time.Time, int) ([]Kline, error)
+	LimitMaker(context.Context, Symbol, Side, float64, float64) (*OrderAck, error)
 	LimitOrder(context.Context, Symbol, Side, float64, float64, TimeInForce) (*OrderAck, error)
 	ListOrderBookTickers(context.Context) ([]OrderBookTicker, error)
 	ListPriceTickers(context.Context) ([]PriceTicker, error)
@@ -28,8 +29,10 @@ type Client interface {
 	Ping(context.Context) error
 	PriceTicker(context.Context, Symbol) (*PriceTicker, error)
 	ServerTime(context.Context) (time.Time, error)
-	StopLossLimitOrder(context.Context, Symbol, float64, float64, float64, TimeInForce) (*OrderAck, error)
-	StopLossOrder(context.Context, Symbol, float64, float64) (*OrderAck, error)
+	StopLossLimitOrder(context.Context, Symbol, Side, float64, float64, float64, TimeInForce) (*OrderAck, error)
+	StopLossOrder(context.Context, Symbol, Side, float64, float64) (*OrderAck, error)
+	TakeProfitLimitOrder(context.Context, Symbol, Side, float64, float64, float64, TimeInForce) (*OrderAck, error)
+	TakeProfitOrder(context.Context, Symbol, Side, float64, float64) (*OrderAck, error)
 	TickerStats(context.Context, Symbol) (*TickerStats, error)
 	RecentTrades(context.Context, Symbol, int) ([]Trade, error)
 }
