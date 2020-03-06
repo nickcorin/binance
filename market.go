@@ -199,6 +199,38 @@ func (c *client) KlinesBetween(ctx context.Context, symbol Symbol,
 	return klines, err
 }
 
+// LimitOrder places a limit order on the exchange.
+func (c *client) LimitOrder(ctx context.Context, symbol Symbol, side Side,
+	v, p float64, tif TimeInForce) (*OrderAck, error) {
+
+	payload := struct {
+		Symbol       string            `json:"symbol"`
+		Side         Side              `json:"side"`
+		Type         OrderType         `json:"type"`
+		TimeInForce  TimeInForce       `json:"timeInForce"`
+		Volume       float64           `json:"qty"`
+		Price        float64           `json:"price"`
+		ResponseType OrderResponseType `json:"newOrderRespType"`
+	}{symbol.String(), side, OrderTypeLimit, tif, v, p, OrderResponseTypeAck}
+
+	reqBody, err := json.Marshal(payload)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse limit order payload")
+	}
+
+	res, err := c.post(ctx, "/order", reqBody)
+	if err != nil {
+		return nil, err
+	}
+
+	var ack OrderAck
+	if err = json.Unmarshal(res, &ack); err != nil {
+		return nil, errors.Wrap(err, "failed to parse order ack")
+	}
+
+	return &ack, nil
+}
+
 // ListOrderBookTickers returns the current best bid and ask prices for all
 // Symbols.
 func (c *client) ListOrderBookTickers(ctx context.Context) (
@@ -247,6 +279,68 @@ func (c *client) ListTickerStats(ctx context.Context) (
 	}
 
 	return stats, nil
+}
+
+// MarketOrder creates a new market order. Volume indicates the amount of the
+// base asset to buy or sell.
+func (c *client) MarketOrder(ctx context.Context, symbol Symbol, side Side,
+	volume float64) (*OrderAck,
+	error) {
+
+	payload := struct {
+		Symbol Symbol    `json:"symbol"`
+		Side   Side      `json:"side"`
+		Volume float64   `json:"qty"`
+		Type   OrderType `json:"type"`
+	}{symbol, side, volume, OrderTypeMarket}
+
+	reqBody, err := json.Marshal(&payload)
+	if err != nil {
+		return nil, errors.Wrap(err, "faield to parse market order payload")
+	}
+
+	res, err := c.post(ctx, "/order", reqBody)
+	if err != nil {
+		return nil, err
+	}
+
+	var ack OrderAck
+	if err = json.Unmarshal(res, &ack); err != nil {
+		return nil, errors.Wrap(err, "failed to parse order ack")
+	}
+
+	return &ack, nil
+}
+
+// MarketOrderSpend creates a new market order. Volume indicates the amount of
+// the quote asset to spend or receive.
+func (c *client) MarketOrderSpend(ctx context.Context, symbol Symbol, side Side,
+	volume float64) (*OrderAck,
+	error) {
+
+	payload := struct {
+		Symbol Symbol    `json:"symbol"`
+		Side   Side      `json:"side"`
+		Volume float64   `json:"quoteOrderQty"`
+		Type   OrderType `json:"type"`
+	}{symbol, side, volume, OrderTypeMarket}
+
+	reqBody, err := json.Marshal(&payload)
+	if err != nil {
+		return nil, errors.Wrap(err, "faield to parse market order payload")
+	}
+
+	res, err := c.post(ctx, "/order", reqBody)
+	if err != nil {
+		return nil, err
+	}
+
+	var ack OrderAck
+	if err = json.Unmarshal(res, &ack); err != nil {
+		return nil, errors.Wrap(err, "failed to parse order ack")
+	}
+
+	return &ack, nil
 }
 
 // OrderBook returns the current state of the exchange's order book with a list

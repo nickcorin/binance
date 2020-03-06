@@ -17,9 +17,12 @@ type Client interface {
 	HistoricalTradesFrom(context.Context, Symbol, int, int64) ([]Trade, error)
 	Klines(context.Context, Symbol, Interval, int) ([]Kline, error)
 	KlinesBetween(context.Context, Symbol, Interval, time.Time, time.Time, int) ([]Kline, error)
+	LimitOrder(context.Context, Symbol, Side, float64, float64, TimeInForce) (*OrderAck, error)
 	ListOrderBookTickers(context.Context) ([]OrderBookTicker, error)
 	ListPriceTickers(context.Context) ([]PriceTicker, error)
 	ListTickerStats(context.Context) ([]TickerStats, error)
+	MarketOrder(context.Context, Symbol, Side, float64) (*OrderAck, error)
+	MarketOrderSpend(context.Context, Symbol, Side, float64) (*OrderAck, error)
 	OrderBook(context.Context, Symbol, int) (*OrderBook, error)
 	OrderBookTicker(context.Context, Symbol) (*OrderBookTicker, error)
 	Ping(context.Context) error

@@ -228,3 +228,37 @@ func TestAggregateTradesFrom_OK(t *testing.T) {
 	require.NotNil(t, trades)
 	require.Equal(t, 1, len(trades))
 }
+
+func TestLimitOrder_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	ack, err := c.LimitOrder(context.Background(), ETHBTC, Buy, 0.1, 0.34,
+		GoodUntilCancelled)
+	require.NoError(t, err)
+	require.NotNil(t, ack)
+}
+
+func TestMarketOrder_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	ack, err := c.MarketOrder(context.Background(), ETHBTC, Buy, 0.1)
+	require.NoError(t, err)
+	require.NotNil(t, ack)
+}
+
+func TestMarketOrderSpend_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	ack, err := c.MarketOrderSpend(context.Background(), ETHBTC, Buy, 0.1)
+	require.NoError(t, err)
+	require.NotNil(t, ack)
+}

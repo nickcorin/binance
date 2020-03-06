@@ -404,11 +404,98 @@ type priceTickerResponse struct {
 	Price  string `json:"price"`
 }
 
+type orderAckResponse struct {
+	Symbol        string `json:"symbol"`
+	OrderID       int    `json:"orderId"`
+	OrderListID   int    `json:"orderListId"`
+	ClientOrderID string `json:"clientOrderId"`
+	Timestamp     int64  `json:"transactTime"`
+}
+
+// OrderAck contains an acknowledgement from the exchange regarding an order.
+type OrderAck struct {
+	Symbol        string
+	OrderID       int
+	OrderListID   int
+	ClientOrderID string
+	Timestamp     time.Time
+}
+
+func (ack *OrderAck) UnmarshalJSON(data []byte) error {
+	var resp orderAckResponse
+	err := json.Unmarshal(data, &resp)
+	if err != nil {
+		return err
+	}
+
+	ack.Symbol = resp.Symbol
+	ack.OrderID = resp.OrderID
+	ack.OrderListID = resp.OrderListID
+	ack.ClientOrderID = resp.ClientOrderID
+	ack.Timestamp = time.Unix(0, resp.Timestamp*1e6)
+
+	return nil
+}
+
+// OrderType describes the behavior of an order's execution.
+type OrderType string
+
+const (
+	// OrderTypeLimit is a limit order which has a maximum or minimum price
+	// to buy or sell.
+	OrderTypeLimit OrderType = "LIMIT"
+
+	// OrderTypeMarket is a market order which only specifies a quantity to
+	// buy or sell at the current market price.
+	OrderTypeMarket OrderType = "MARKET"
+
+	// OrderTypeStopLoss is a market order that only executes when a given
+	// stop price is reached. Usually used to minimize loss when the market
+	// drops.
+	OrderTypeStopLoss OrderType = "STOP_LOSS"
+
+	// OrderTypeStopLossLimit is a limit order that only executes when a
+	// given stop price is reached.
+	OrderTypeStopLossLimit OrderType = "STOP_LOSS_LIMIT"
+
+	// OrderTypeTakeProfit is a market order that only executes when a given
+	// stop price is reached. Usually used to lock in profits when the
+	// market suddenly rises.
+	OrderTypeTakeProfit OrderType = "TAKE_PROFIT"
+
+	// OrderTypeTakeProfitLimit is a limit order that only executed when a
+	// given stop price is reached. Usually used to lock in profits when
+	// the market suddenly rises.
+	OrderTypeTakeProfitLimit OrderType = "TAKE_PROFIT_LIMIT"
+
+	// OrderTypeLimitMaker is a limit order that is rejected if it would
+	// get executed immediately and trade as a taker.
+	OrderTypeLimitMaker OrderType = "LIMIT_MAKER"
+)
+
+// OrderResponseType defines the type of response you'd like to receive after
+// creating a new order.
+type OrderResponseType string
+
+const (
+	OrderResponseTypeAck    = "ACK"
+	OrderResponseTypeResult = "RESULT"
+	OrderResponseTypeFull   = "FULL"
+)
+
 // PriceTicker contains a price for a Symbol.
 type PriceTicker struct {
 	Symbol string
 	Price  float64
 }
+
+// Side indicates whether an order is buying or selling assets.
+type Side string
+
+const (
+	Buy  Side = "BUY"
+	Sell Side = "SELL"
+)
 
 func (ticker *PriceTicker) UnmarshalJSON(data []byte) error {
 	var resp priceTickerResponse
@@ -567,6 +654,24 @@ func (stats *TickerStats) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+// TimeInForce sets the duration that an order should be valid.
+type TimeInForce string
+
+const (
+	// GoodUntilCancelled keeps the order active until explicitly
+	// cancelled.
+	GoodUntilCancelled = "GTC"
+
+	// FillOrKill cancels the order if it is not executed as soon as it
+	// becomes available. This is usually to ensure that the order is
+	// filled at a single price.
+	FillOrKill = "FOK"
+
+	// ImmediateOrCancel cancels the order if it cannot be completely
+	// filled immediately.
+	ImmediateOrCancel = "IOC"
+)
 
 type tradeResponse struct {
 	ID           int64  `json:"id"`
