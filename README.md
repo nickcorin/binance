@@ -4,7 +4,7 @@
 [![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/nickcorin/binance)
 
 ## About the package
-This package provides an unoffiial client library to interface with Binance's REST API. I am in no way affiliated with Binance.
+This package provides an unofficial client library to interface with Binance's REST API. I am in no way affiliated with Binance.
 
 **This package is a work in progress, and not fully tested. Use at your own risk.**
 
