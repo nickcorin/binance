@@ -4,9 +4,10 @@
 [![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/nickcorin/binance)
 
 ## About the package
-This package provides a client library to interface with Binance's REST API.
+This package provides an unoffiial client library to interface with Binance's REST API. I am in no way affiliated
+with Binance.
 
-**This package is a work in progress.**
+**This package is a work in progress. Use at your own risk.**
 
 The package is incomplete and not fully tested. I am following the API documentation for Binance found [here](https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md).
 
@@ -75,3 +76,11 @@ func main() {
 - [ ] Query Open OCO
 - [x] Account Info
 - [ ] Account Trade List
+
+## Donations
+
+If this package helped you out, feel free to donate.
+
+BTC: 34vfza4AWUsYtSG2zheNntrUtHircvkgUC
+BCH: pq8lwev3qykw3yqcfrrcelzafd0uact3wyjp3j3pnc
+ETH: 0xa9a84846b43FAb5d3694222De29F0973FDfc07a2
