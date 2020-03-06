@@ -62,7 +62,7 @@ func main() {
 
 ### Account
 
-- [ ] New Order
+- [x] New Order
 - [ ] Test New Order
 - [ ] Query Order
 - [ ] Cancel Order
