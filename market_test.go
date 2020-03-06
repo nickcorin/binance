@@ -262,3 +262,27 @@ func TestMarketOrderSpend_OK(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, ack)
 }
+
+func TestStopLossLimitOrder_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	ack, err := c.StopLossLimitOrder(context.Background(), ETHBTC, 0.1,
+		0.34, 0.34, GoodUntilCancelled)
+	require.NoError(t, err)
+	require.NotNil(t, ack)
+}
+
+func TestStopLossOrder_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	ack, err := c.StopLossOrder(context.Background(), ETHBTC, 0.1,
+		0.34)
+	require.NoError(t, err)
+	require.NotNil(t, ack)
+}
