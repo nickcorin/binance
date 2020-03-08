@@ -64,7 +64,7 @@ func main() {
 
 - [x] New Order
 - [ ] Test New Order
-- [ ] Query Order
+- [x] Query Order
 - [ ] Cancel Order
 - [ ] Current Open Orders
 - [ ] All Orders
