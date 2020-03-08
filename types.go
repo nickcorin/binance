@@ -404,6 +404,111 @@ type priceTickerResponse struct {
 	Price  string `json:"price"`
 }
 
+type orderResponse struct {
+	Symbol                   string `json:"symbol"`
+	OrderID                  int64  `json:"orderId"`
+	OrderListID              int64  `json:"orderListId"`
+	ClientOrderID            string `json:"clientOrderId"`
+	Price                    string `json:"price"`
+	OriginalVolume           string `json:"origQty"`
+	ExecutedVolume           string `json:"executedQty"`
+	CummulativeQuoteVolume   string `json:"cummulativeQuoteQty"`
+	Status                   string `json:"status"`
+	TimeInForce              string `json:"timeInForce"`
+	Type                     string `json:"type"`
+	Side                     string `json:"side"`
+	StopPrice                string `json:"stopPrice"`
+	IcebergVolume            string `json:"icebergQty"`
+	Timestamp                int64  `json:"time"`
+	UpdateTime               int64  `json:"updateTime"`
+	IsWorking                bool   `json:"isWorking"`
+	OriginalQuoteOrderVolume string `json:"origQuoteOrderQty"`
+}
+
+type Order struct {
+	Symbol                   Symbol
+	OrderID                  int64
+	OrderListID              int64
+	ClientOrderID            string
+	Price                    float64
+	OriginalVolume           float64
+	ExecutedVolume           float64
+	CummulativeQuoteVolume   float64
+	Status                   OrderStatus
+	TimeInForce              TimeInForce
+	Type                     OrderType
+	Side                     Side
+	StopPrice                float64
+	IcebergVolume            float64
+	Timestamp                time.Time
+	UpdatedAt                time.Time
+	IsWorking                bool
+	OriginalQuoteOrderVolume float64
+}
+
+func (o *Order) UnmarshalJSON(data []byte) error {
+	var resp orderResponse
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return err
+	}
+
+	p, err := strconv.ParseFloat(resp.Price, 64)
+	if err != nil {
+		return err
+	}
+
+	ov, err := strconv.ParseFloat(resp.OriginalVolume, 64)
+	if err != nil {
+		return err
+	}
+
+	ev, err := strconv.ParseFloat(resp.ExecutedVolume, 64)
+	if err != nil {
+		return err
+	}
+
+	cqv, err := strconv.ParseFloat(resp.CummulativeQuoteVolume, 64)
+	if err != nil {
+		return err
+	}
+
+	sp, err := strconv.ParseFloat(resp.StopPrice, 64)
+	if err != nil {
+		return err
+	}
+
+	iv, err := strconv.ParseFloat(resp.IcebergVolume, 64)
+	if err != nil {
+		return err
+	}
+
+	oqov, err := strconv.ParseFloat(resp.OriginalQuoteOrderVolume, 64)
+	if err != nil {
+		return err
+	}
+
+	o.Symbol = Symbol(resp.Symbol)
+	o.OrderID = resp.OrderID
+	o.OrderListID = resp.OrderListID
+	o.ClientOrderID = resp.ClientOrderID
+	o.Price = p
+	o.OriginalVolume = ov
+	o.ExecutedVolume = ev
+	o.CummulativeQuoteVolume = cqv
+	o.Status = OrderStatus(resp.Status)
+	o.TimeInForce = TimeInForce(resp.TimeInForce)
+	o.Type = OrderType(resp.Type)
+	o.Side = Side(resp.Side)
+	o.StopPrice = sp
+	o.IcebergVolume = iv
+	o.Timestamp = time.Unix(0, resp.Timestamp*1e6)
+	o.UpdatedAt = time.Unix(0, resp.UpdateTime*1e6)
+	o.IsWorking = resp.IsWorking
+	o.OriginalQuoteOrderVolume = oqov
+
+	return nil
+}
+
 type orderAckResponse struct {
 	Symbol        string `json:"symbol"`
 	OrderID       int    `json:"orderId"`
@@ -436,6 +541,36 @@ func (ack *OrderAck) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+// OrderStatus describes the current state of an order.
+type OrderStatus string
+
+const (
+	// OrderStatusNew describes a newly created order.
+	OrderStatusNew OrderStatus = "NEW"
+
+	// OrderStatusPartiallyFilled describes an order which has had some of
+	// its bought or sold.
+	OrderStatusPartiallyFilled OrderStatus = "PARTIALLY_FILLED"
+
+	// OrderStatusFilled describes a completed order.
+	OrderStatusFilled OrderStatus = "FILLED"
+
+	// OrderStatusCancelled describes an order that has been cancelled.
+	OrderStatusCancelled OrderStatus = "CANCELLED"
+
+	// OrderStatusPendingCancel is currently unused.
+	OrderStatusPendingCancel OrderStatus = "PENDING_CANCEL"
+
+	// OrderStatusRejected describes an order that has been rejected by
+	// the exchange. This could be due to insuffienct funds in an account
+	// or invalid parameters.
+	OrderStatusRejected OrderStatus = "REJECTED"
+
+	// OrderStatusExpired describes an order that has outlived its
+	// TimeInForce configuration.
+	OrderStatusExpired OrderStatus = "EXPIRED"
+)
 
 // OrderType describes the behavior of an order's execution.
 type OrderType string

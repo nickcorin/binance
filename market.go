@@ -32,7 +32,7 @@ func (c *client) AccountInfo(ctx context.Context) (*AccountInfo, error) {
 func (c *client) AggregateTrades(ctx context.Context, symbol Symbol,
 	limit int) ([]AggregateTrade, error) {
 	res, err := c.get(ctx, fmt.Sprintf("/aggTrades?symbol=%s&limit=%d",
-		symbol.String(), limit))
+		string(symbol), limit))
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (c *client) AggregateTradesAfter(ctx context.Context, symbol Symbol,
 	from time.Time, limit int) ([]AggregateTrade, error) {
 	res, err := c.get(ctx,
 		fmt.Sprintf("/aggTrades?symbol=%s&startTime=%d&limit=%d",
-			symbol.String(), from.UnixNano()/1e6, limit))
+			string(symbol), from.UnixNano()/1e6, limit))
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (c *client) AggregateTradesBetween(ctx context.Context, symbol Symbol,
 	from time.Time, to time.Time, limit int) ([]AggregateTrade, error) {
 	res, err := c.get(ctx,
 		fmt.Sprintf("/aggTrades?symbol=%s&startTime=%d&endTime=%d&limit=%d",
-			symbol.String(), from.UnixNano()/1e6, to.UnixNano()/1e6, limit))
+			string(symbol), from.UnixNano()/1e6, to.UnixNano()/1e6, limit))
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func (c *client) AggregateTradesFrom(ctx context.Context, symbol Symbol,
 	from int64, limit int) ([]AggregateTrade, error) {
 	res, err := c.get(ctx,
 		fmt.Sprintf("/aggTrades?symbol=%s&fromId=%d&limit=%d",
-			symbol.String(), from, limit))
+			string(symbol), from, limit))
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (c *client) AggregateTradesFrom(ctx context.Context, symbol Symbol,
 func (c *client) AveragePrice(ctx context.Context, symbol Symbol) (*AveragePrice,
 	error) {
 	res, err := c.get(ctx, fmt.Sprintf("/avgPrice&symbol=%s",
-		symbol.String()))
+		string(symbol)))
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +167,7 @@ func (c *client) Klines(ctx context.Context, symbol Symbol, interval Interval,
 	limit int) ([]Kline, error) {
 	res, err := c.get(ctx,
 		fmt.Sprintf("/klines?symbol=%s&interval=%s&limit=%d",
-			symbol.String(), interval, limit))
+			string(symbol), interval, limit))
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +188,7 @@ func (c *client) KlinesBetween(ctx context.Context, symbol Symbol,
 	end := to.UnixNano() / 1e6
 	res, err := c.get(ctx,
 		fmt.Sprintf("/klines?symbol=%s&interval=%s&limit=%d&startTime=%d&endTime=%d",
-			symbol.String(), interval, limit, start, end))
+			string(symbol), interval, limit, start, end))
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func (c *client) LimitMaker(ctx context.Context, symbol Symbol, side Side,
 	volume, price float64) (*OrderAck, error) {
 
 	payload := make(url.Values)
-	payload.Set("symbol", symbol.String())
+	payload.Set("symbol", string(symbol))
 	payload.Set("side", string(side))
 	payload.Set("type", string(OrderTypeLimitMaker))
 	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
@@ -232,7 +232,7 @@ func (c *client) LimitOrder(ctx context.Context, symbol Symbol, side Side,
 	volume, price float64, tif TimeInForce) (*OrderAck, error) {
 
 	payload := make(url.Values)
-	payload.Set("symbol", symbol.String())
+	payload.Set("symbol", string(symbol))
 	payload.Set("side", string(side))
 	payload.Set("type", string(OrderTypeLimit))
 	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
@@ -310,7 +310,7 @@ func (c *client) MarketOrder(ctx context.Context, symbol Symbol, side Side,
 	error) {
 
 	payload := make(url.Values)
-	payload.Set("symbol", symbol.String())
+	payload.Set("symbol", string(symbol))
 	payload.Set("side", string(side))
 	payload.Set("type", string(OrderTypeMarket))
 	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
@@ -335,7 +335,7 @@ func (c *client) MarketOrderSpend(ctx context.Context, symbol Symbol, side Side,
 	volume float64) (*OrderAck, error) {
 
 	payload := make(url.Values)
-	payload.Set("symbol", symbol.String())
+	payload.Set("symbol", string(symbol))
 	payload.Set("side", string(side))
 	payload.Set("type", string(OrderTypeMarket))
 	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
@@ -361,7 +361,7 @@ func (c *client) MarketOrderSpend(ctx context.Context, symbol Symbol, side Side,
 func (c *client) OrderBook(ctx context.Context, symbol Symbol, limit int) (
 	*OrderBook, error) {
 	res, err := c.get(ctx, fmt.Sprintf("/depth?symbol=%s&limit=%d",
-		symbol.String(), limit))
+		string(symbol), limit))
 	if err != nil {
 		return nil, err
 	}
@@ -378,7 +378,7 @@ func (c *client) OrderBook(ctx context.Context, symbol Symbol, limit int) (
 func (c *client) OrderBookTicker(ctx context.Context, symbol Symbol) (
 	*OrderBookTicker, error) {
 	res, err := c.get(ctx, fmt.Sprintf("/ticker/bookTicker?symbol=%s",
-		symbol.String()))
+		string(symbol)))
 	if err != nil {
 		return nil, err
 	}
@@ -395,7 +395,7 @@ func (c *client) OrderBookTicker(ctx context.Context, symbol Symbol) (
 func (c *client) PriceTicker(ctx context.Context, symbol Symbol) (
 	*PriceTicker, error) {
 	res, err := c.get(ctx, fmt.Sprintf("/ticker/price?symbol=%s",
-		symbol.String()))
+		string(symbol)))
 	if err != nil {
 		return nil, err
 	}
@@ -415,7 +415,7 @@ func (c *client) StopLossLimitOrder(ctx context.Context, symbol Symbol,
 	*OrderAck, error) {
 
 	payload := make(url.Values)
-	payload.Set("symbol", symbol.String())
+	payload.Set("symbol", string(symbol))
 	payload.Set("side", string(side))
 	payload.Set("type", string(OrderTypeStopLossLimit))
 	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
@@ -443,7 +443,7 @@ func (c *client) StopLossOrder(ctx context.Context, symbol Symbol, side Side,
 	volume, stopPrice float64) (*OrderAck, error) {
 
 	payload := make(url.Values)
-	payload.Set("symbol", symbol.String())
+	payload.Set("symbol", string(symbol))
 	payload.Set("side", string(side))
 	payload.Set("type", string(OrderTypeStopLoss))
 	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
@@ -470,7 +470,7 @@ func (c *client) TakeProfitLimitOrder(ctx context.Context, symbol Symbol,
 	*OrderAck, error) {
 
 	payload := make(url.Values)
-	payload.Set("symbol", symbol.String())
+	payload.Set("symbol", string(symbol))
 	payload.Set("side", string(side))
 	payload.Set("type", string(OrderTypeTakeProfit))
 	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
@@ -498,7 +498,7 @@ func (c *client) TakeProfitOrder(ctx context.Context, symbol Symbol, side Side,
 	volume, stopPrice float64) (*OrderAck, error) {
 
 	payload := make(url.Values)
-	payload.Set("symbol", symbol.String())
+	payload.Set("symbol", string(symbol))
 	payload.Set("side", string(side))
 	payload.Set("type", string(OrderTypeTakeProfit))
 	payload.Set("quantity", strconv.FormatFloat(volume, 'f', -1, 64))
@@ -523,7 +523,7 @@ func (c *client) TakeProfitOrder(ctx context.Context, symbol Symbol, side Side,
 func (c *client) TickerStats(ctx context.Context, symbol Symbol) (*TickerStats,
 	error) {
 	res, err := c.get(ctx, fmt.Sprintf("/ticker/24h?symbol=%s",
-		symbol.String()))
+		string(symbol)))
 	if err != nil {
 		return nil, err
 	}
@@ -541,7 +541,7 @@ func (c *client) TickerStats(ctx context.Context, symbol Symbol) (*TickerStats,
 func (c *client) RecentTrades(ctx context.Context, symbol Symbol, limit int) (
 	[]Trade, error) {
 	res, err := c.get(ctx, fmt.Sprintf("/trades?symbol=%s&limit=%d",
-		symbol.String(), limit))
+		string(symbol), limit))
 	if err != nil {
 		return nil, err
 	}
@@ -552,4 +552,38 @@ func (c *client) RecentTrades(ctx context.Context, symbol Symbol, limit int) (
 	}
 
 	return trades, nil
+}
+
+// QueryOrder returns an Order searched by the internal order id.
+func (c *client) QueryOrder(ctx context.Context, symbol Symbol, orderID int64) (
+	*Order, error) {
+	res, err := c.get(ctx, fmt.Sprintf("/order?symbol=%s&orderId=%d",
+		string(symbol), orderID))
+	if err != nil {
+		return nil, err
+	}
+
+	var order Order
+	if err = json.Unmarshal(res, &order); err != nil {
+		return nil, errors.Wrap(err, "failed to parse order")
+	}
+
+	return &order, nil
+}
+
+// QueryClientORder returns an Order searched by the client order id.
+func (c *client) QueryClientOrder(ctx context.Context, symbol Symbol,
+	orderID string) (*Order, error) {
+	res, err := c.get(ctx, fmt.Sprintf("/order?symbol=%s&origClientOrderId=%s",
+		string(symbol), orderID))
+	if err != nil {
+		return nil, err
+	}
+
+	var order Order
+	if err = json.Unmarshal(res, &order); err != nil {
+		return nil, errors.Wrap(err, "failed to parse order")
+	}
+
+	return &order, nil
 }

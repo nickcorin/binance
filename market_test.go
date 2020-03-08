@@ -321,3 +321,25 @@ func TestLimitMaker_OK(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, ack)
 }
+
+func TestQueryOrder_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	order, err := c.QueryOrder(context.Background(), ETHBTC, 12345)
+	require.NoError(t, err)
+	require.NotNil(t, order)
+}
+
+func TestQueryClientOrder_OK(t *testing.T) {
+	srv, err := createTestServer(t, http.StatusOK)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	c := NewClient(WithBaseURL(srv.URL))
+	order, err := c.QueryClientOrder(context.Background(), ETHBTC, "12345")
+	require.NoError(t, err)
+	require.NotNil(t, order)
+}

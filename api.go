@@ -35,4 +35,6 @@ type Client interface {
 	TakeProfitOrder(context.Context, Symbol, Side, float64, float64) (*OrderAck, error)
 	TickerStats(context.Context, Symbol) (*TickerStats, error)
 	RecentTrades(context.Context, Symbol, int) ([]Trade, error)
+	QueryOrder(context.Context, Symbol, int64) (*Order, error)
+	QueryClientOrder(context.Context, Symbol, string) (*Order, error)
 }
