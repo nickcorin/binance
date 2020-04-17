@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/luno/jettison"
 	"github.com/luno/jettison/errors"
 	"github.com/luno/jettison/j"
 	"github.com/luno/jettison/log"
@@ -34,6 +35,29 @@ func NewClient(opts ...ClientOption) Client {
 	}
 
 	return &c
+}
+
+// debug is a wrapper for jettison.Info logging, but checks that the client has
+// a sufficient log level before writing the log.
+func (c *client) debug(ctx context.Context, msg string,
+	opts ...jettison.Option) {
+	if c.options.logLevel >= LogLevelDebug {
+		log.Info(ctx, msg, opts...)
+	}
+}
+
+// error is a wrapper for jettison.Error, but checks that the client has a
+// sufficient log level before writing the log. It returns an error for
+// convenience of returning c.error(...), although should only be used in this
+// context at the highest level in the error stack to prevent duplicate
+// logging.
+func (c *client) error(ctx context.Context, err error,
+	opts ...jettison.Option) error {
+	clientErrorsCounter.WithLabelValues(err.Error()).Inc()
+	if c.options.logLevel >= LogLevelError {
+		log.Error(ctx, err, opts...)
+	}
+	return err
 }
 
 // HeaderAPIKey defines the request header to set with the client's API key.
@@ -98,19 +122,20 @@ func (c *client) call(ctx context.Context, method, path string,
 	reqStart := time.Now()
 	res, err := c.options.transport.Do(req)
 	if err != nil {
-		return nil, errors.Wrap(err, "request failed")
+		return nil, errors.Wrap(err, "failed to execute request")
 	}
 	latency := time.Since(reqStart)
 
 	// Record system metrics.
-	httpRequestLatency.WithLabelValues(u.Path).Observe(latency.Seconds())
-	httpResponseCodes.WithLabelValues(u.Path, fmt.Sprintf("%d",
+	httpRequestLatencyHist.WithLabelValues(u.Path).Observe(latency.Seconds())
+	httpResponseCodesCounter.WithLabelValues(u.Path, fmt.Sprintf("%d",
 		res.StatusCode)).Inc()
+	c.debug(ctx, "HTTPS client request", j.KV("status_code", res.StatusCode))
 
 	defer res.Body.Close()
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read response bytes")
+		return nil, errors.Wrap(err, "failed to read response body")
 	}
 
 	// We can assume that 2XX response codes mean that the request was
@@ -129,7 +154,7 @@ func (c *client) call(ctx context.Context, method, path string,
 	var apiError Error
 	err = json.Unmarshal(b, &apiError)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to parse response error")
 	}
 
 	return nil, apiError
@@ -158,7 +183,7 @@ func (c *client) delete(ctx context.Context, path string, body []byte) ([]byte,
 func (c *client) Ping(ctx context.Context) error {
 	_, err := c.get(ctx, "/ping")
 	if err != nil {
-		return err
+		return c.error(ctx, err)
 	}
 
 	return nil
@@ -168,7 +193,7 @@ func (c *client) Ping(ctx context.Context) error {
 func (c *client) ServerTime(ctx context.Context) (time.Time, error) {
 	res, err := c.get(ctx, "/time")
 	if err != nil {
-		return time.Time{}, err
+		return time.Time{}, c.error(ctx, err)
 	}
 
 	timeResponse := struct {
@@ -176,7 +201,8 @@ func (c *client) ServerTime(ctx context.Context) (time.Time, error) {
 	}{}
 
 	if err = json.Unmarshal(res, &timeResponse); err != nil {
-		return time.Time{}, errors.Wrap(err, "failed to parse server time")
+		return time.Time{}, c.error(ctx, errors.Wrap(err,
+			"failed to parse server time"))
 	}
 
 	return time.Unix(0, timeResponse.Milliseconds*1e6), nil
