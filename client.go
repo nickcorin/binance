@@ -36,9 +36,11 @@ func NewClient(opts ...ClientOption) Client {
 	return &c
 }
 
+// HeaderAPIKey defines the request header to set with the client's API key.
+const HeaderAPIKey = "X-MBX-APIKEY"
+
 func (c *client) setAuthHeader(r *http.Request) *http.Request {
-	log.Printf("Debug: %s", c.options.apiKey)
-	r.Header.Set("X-MBX-APIKEY", c.options.apiKey)
+	r.Header.Set(HeaderAPIKey, c.options.apiKey)
 	return r
 }
 

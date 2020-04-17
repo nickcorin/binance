@@ -36,23 +36,18 @@ func (e Error) IsAny(codes ...ErrorCode) bool {
 type ErrorCode int
 
 var (
-	// General server or network issues.
-
-	ErrUnknown                 ErrorCode = -1000
-	ErrDisconnected            ErrorCode = -1001
-	ErrUnauthorized            ErrorCode = -1002
-	ErrTooManyRequests         ErrorCode = -1003
-	ErrUnexpectedResponse      ErrorCode = -1006
-	ErrTimeout                 ErrorCode = -1007
-	ErrUnknownOrderComposition ErrorCode = -1014
-	ErrTooManyOrders           ErrorCode = -1015
-	ErrServiceShuttingDown     ErrorCode = -1016
-	ErrUnsupportedOperation    ErrorCode = -1020
-	ErrInvalidTimestamp        ErrorCode = -1021
-	ErrInvalidSignature        ErrorCode = -1022
-
-	// Requst issues.
-
+	ErrUnknown                        ErrorCode = -1000
+	ErrDisconnected                   ErrorCode = -1001
+	ErrUnauthorized                   ErrorCode = -1002
+	ErrTooManyRequests                ErrorCode = -1003
+	ErrUnexpectedResponse             ErrorCode = -1006
+	ErrTimeout                        ErrorCode = -1007
+	ErrUnknownOrderComposition        ErrorCode = -1014
+	ErrTooManyOrders                  ErrorCode = -1015
+	ErrServiceShuttingDown            ErrorCode = -1016
+	ErrUnsupportedOperation           ErrorCode = -1020
+	ErrInvalidTimestamp               ErrorCode = -1021
+	ErrInvalidSignature               ErrorCode = -1022
 	ErrIllegalChars                   ErrorCode = -1100
 	ErrTooManyParams                  ErrorCode = -1101
 	ErrMandatoryParamEmptyOrMalformed ErrorCode = -1102

@@ -7,6 +7,7 @@ import (
 
 var defaultOptions = ClientOptions{
 	baseURL:   "https://api.binance.com/api/v3",
+	logLevel:  LogLevelNone,
 	transport: http.DefaultClient,
 
 	// This is the default on Binance, but setting it explicitly to avoid
@@ -24,7 +25,7 @@ type ClientOptions struct {
 	receiveWindow time.Duration
 }
 
-// ClientOption is a function adapter for configuring ClientOptions.
+// ClientOption is a func-to-ClientOption adapter.
 type ClientOption func(*ClientOptions)
 
 // LogLevel configures the extent to which a Client should write output logs.
@@ -32,15 +33,16 @@ type LogLevel int
 
 const (
 	// LogLevelNone disables logging.
-	LogLevelNone = 0
+	LogLevelNone LogLevel = 0
 
 	// LogLevelError only logs errors.
 	LogLevelError LogLevel = 1
 
-	// LogLevelInfo logs most activity.
-	LogLevelInfo LogLevel = 2
+	// LogLevelDebug logs most activity.
+	LogLevelDebug LogLevel = 2
 
-	logLevelSentinel = 3
+	// must be last.
+	logLevelSentinel LogLevel = 3
 )
 
 // Valid returns whether `level` is a declared LogLevel constant.
