@@ -99,12 +99,6 @@ func (c *client) call(ctx context.Context, method, path string,
 		return nil, errors.Wrap(err, "failed to parse uri")
 	}
 
-	// Add receive window to requests.
-	values := u.Query()
-	values.Set("recvWindow",
-		fmt.Sprintf("%d", c.options.receiveWindow.Milliseconds()))
-	u.RawQuery = values.Encode()
-
 	req, err := http.NewRequestWithContext(ctx, method, u.String(),
 		bytes.NewBuffer(body))
 	if err != nil {

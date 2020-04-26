@@ -2,27 +2,21 @@ package binance
 
 import (
 	"net/http"
-	"time"
 )
 
 var defaultOptions = ClientOptions{
 	baseURL:   "https://api.binance.com/api/v3",
 	logLevel:  LogLevelNone,
 	transport: http.DefaultClient,
-
-	// This is the default on Binance, but setting it explicitly to avoid
-	// unexpected behavior.
-	receiveWindow: time.Millisecond * 5000,
 }
 
 // ClientOptions provides configurable fields for Client.
 type ClientOptions struct {
-	apiKey        string
-	baseURL       string
-	logLevel      LogLevel
-	secretKey     string
-	transport     *http.Client
-	receiveWindow time.Duration
+	apiKey    string
+	baseURL   string
+	logLevel  LogLevel
+	secretKey string
+	transport *http.Client
 }
 
 // ClientOption is a func-to-ClientOption adapter.
@@ -76,16 +70,6 @@ func WithLogLevel(level LogLevel) ClientOption {
 
 	return func(opts *ClientOptions) {
 		opts.logLevel = level
-	}
-}
-
-// WithReceiveWindow returns a ClientOption to set the duration that a request
-// should remain valid after being sent. For example, a receive window of
-// 1000ms will invalidate the request on the server if it is not processed
-// within 1 second of being sent. Defaults to 5000ms.
-func WithReceiveWindow(window time.Duration) ClientOption {
-	return func(opts *ClientOptions) {
-		opts.receiveWindow = window
 	}
 }
 
