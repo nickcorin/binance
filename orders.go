@@ -311,6 +311,24 @@ type OrderFill struct {
 	Qty string `schema:"qty"`
 }
 
+// TimeInForce sets the duration that an order should be valid.
+type TimeInForce string
+
+const (
+	// GoodUntilCancelled keeps the order active until explicitly
+	// cancelled.
+	GoodUntilCancelled = "GTC"
+
+	// FillOrKill cancels the order if it is not executed as soon as it
+	// becomes available. This is usually to ensure that the order is
+	// filled at a single price.
+	FillOrKill = "FOK"
+
+	// ImmediateOrCancel cancels the order if it cannot be completely
+	// filled immediately.
+	ImmediateOrCancel = "IOC"
+)
+
 // QueryOrderRequest contains the parameters for querying an existing order.
 type QueryOrderRequest struct {
 	// OrderID represents the unique identifier provided by Binance on order
@@ -407,7 +425,7 @@ func (c *client) CancelOrder(ctx context.Context, r *CancelOrderRequest) (
 	}
 
 	var cancelOrder CancelOrderResponse
-	if err = json.Unmarshal(res, cancelOrder); err != nil {
+	if err = json.Unmarshal(res, &cancelOrder); err != nil {
 		return nil, errors.Wrap(err, "failed to parse cancel order response")
 	}
 
