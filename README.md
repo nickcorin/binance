@@ -67,7 +67,7 @@ func main() {
 - [ ] Current Average Price
 - [ ] 24 Hour Ticker
 - [ ] Price Ticker
-- [ ] Order Book Ticker
+- [x] Order Book Ticker
 
 ### Account
 
