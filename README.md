@@ -28,12 +28,12 @@ func main() {
 
 	// Create an order request.
 	req := binance.NewOrderRequest{
-		Price: 			0.81,
+		Price:			0.81,
 		Side:			binance.OrderSideBuy,
-		Symbol: 		"ETHBTC",
-		TimeInForce: 	binance.GTC,
+		Symbol:			"ETHBTC",
+		TimeInForce:	binance.GTC,
 		Type:			binance.OrderTypeLimit,
-		Quantity: 		0.5,
+		Quantity:		0.5,
 	}
 
 	// Test the order.
