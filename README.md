@@ -73,8 +73,8 @@ func main() {
 
 - [x] New Order
 - [x] Test New Order
-- [ ] Query Order
-- [ ] Cancel Order
+- [x] Query Order
+- [x] Cancel Order
 - [ ] Current Open Orders
 - [ ] All Orders
 - [ ] New OCO

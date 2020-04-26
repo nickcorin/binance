@@ -9,20 +9,6 @@ import (
 	"github.com/luno/jettison/errors"
 )
 
-// AccountInfo contains all information pertaining to a user's account.
-type AccountInfo struct {
-	MakerCommission  int       `json:"makerCommission"`
-	TakerCommission  int       `json:"takerCommission"`
-	BuyerCommission  int       `json:"buyerCommission"`
-	SellerCommission int       `json:"sellerCommission"`
-	CanTrade         bool      `json:"canTrade"`
-	CanWithdraw      bool      `json:"canWithdraw"`
-	CanDeposit       bool      `json:"canDesposit"`
-	UpdateTime       int64     `json:"updateTime"`
-	AccountType      string    `json:"accountType"`
-	Balances         []Balance `json:"balances"`
-}
-
 type aggregateTradeResponse struct {
 	ID           int64  `json:"a"`
 	Price        string `json:"p"`
@@ -110,12 +96,6 @@ type balanceResponse struct {
 	Asset  string `json:"asset"`
 	Free   string `json:"free"`
 	Locked string `json:"locked"`
-}
-
-type Balance struct {
-	Asset  string
-	Free   float64
-	Locked float64
 }
 
 // Balance contains the amount breakdown of a given asset in your wallet.

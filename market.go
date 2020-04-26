@@ -9,21 +9,6 @@ import (
 	"github.com/luno/jettison/errors"
 )
 
-// AccountInfo returns all information and balances for a user account.
-func (c *client) AccountInfo(ctx context.Context) (*AccountInfo, error) {
-	res, err := c.get(ctx, "/account")
-	if err != nil {
-		return nil, err
-	}
-
-	var info AccountInfo
-	if err = json.Unmarshal(res, &info); err != nil {
-		return nil, errors.Wrap(err, "failed to parse account info")
-	}
-
-	return &info, err
-}
-
 // AggregateTrades returns a list of the most recent trades. Trades are
 // aggregated if they were executed as part of the same order, at the same time
 // and for the same price for a given Symbol. Max limit is 1000.
@@ -337,38 +322,4 @@ func (c *client) RecentTrades(ctx context.Context, symbol Symbol, limit int) (
 	}
 
 	return trades, nil
-}
-
-// QueryOrder returns an Order searched by the internal order id.
-func (c *client) QueryOrder(ctx context.Context, symbol Symbol, orderID int64) (
-	*Order, error) {
-	res, err := c.get(ctx, fmt.Sprintf("/order?symbol=%s&orderId=%d",
-		string(symbol), orderID))
-	if err != nil {
-		return nil, err
-	}
-
-	var order Order
-	if err = json.Unmarshal(res, &order); err != nil {
-		return nil, errors.Wrap(err, "failed to parse order")
-	}
-
-	return &order, nil
-}
-
-// QueryClientORder returns an Order searched by the client order id.
-func (c *client) QueryClientOrder(ctx context.Context, symbol Symbol,
-	orderID string) (*Order, error) {
-	res, err := c.get(ctx, fmt.Sprintf("/order?symbol=%s&origClientOrderId=%s",
-		string(symbol), orderID))
-	if err != nil {
-		return nil, err
-	}
-
-	var order Order
-	if err = json.Unmarshal(res, &order); err != nil {
-		return nil, errors.Wrap(err, "failed to parse order")
-	}
-
-	return &order, nil
 }
