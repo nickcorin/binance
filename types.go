@@ -437,7 +437,7 @@ type Order struct {
 	Status                   OrderStatus
 	TimeInForce              TimeInForce
 	Type                     OrderType
-	Side                     Side
+	Side                     OrderSide
 	StopPrice                float64
 	IcebergVolume            float64
 	Timestamp                time.Time
@@ -498,7 +498,7 @@ func (o *Order) UnmarshalJSON(data []byte) error {
 	o.Status = OrderStatus(resp.Status)
 	o.TimeInForce = TimeInForce(resp.TimeInForce)
 	o.Type = OrderType(resp.Type)
-	o.Side = Side(resp.Side)
+	o.Side = OrderSide(resp.Side)
 	o.StopPrice = sp
 	o.IcebergVolume = iv
 	o.Timestamp = time.Unix(0, resp.Timestamp*1e6)
@@ -542,95 +542,11 @@ func (ack *OrderAck) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// OrderStatus describes the current state of an order.
-type OrderStatus string
-
-const (
-	// OrderStatusNew describes a newly created order.
-	OrderStatusNew OrderStatus = "NEW"
-
-	// OrderStatusPartiallyFilled describes an order which has had some of
-	// its bought or sold.
-	OrderStatusPartiallyFilled OrderStatus = "PARTIALLY_FILLED"
-
-	// OrderStatusFilled describes a completed order.
-	OrderStatusFilled OrderStatus = "FILLED"
-
-	// OrderStatusCancelled describes an order that has been cancelled.
-	OrderStatusCancelled OrderStatus = "CANCELLED"
-
-	// OrderStatusPendingCancel is currently unused.
-	OrderStatusPendingCancel OrderStatus = "PENDING_CANCEL"
-
-	// OrderStatusRejected describes an order that has been rejected by
-	// the exchange. This could be due to insuffienct funds in an account
-	// or invalid parameters.
-	OrderStatusRejected OrderStatus = "REJECTED"
-
-	// OrderStatusExpired describes an order that has outlived its
-	// TimeInForce configuration.
-	OrderStatusExpired OrderStatus = "EXPIRED"
-)
-
-// OrderType describes the behavior of an order's execution.
-type OrderType string
-
-const (
-	// OrderTypeLimit is a limit order which has a maximum or minimum price
-	// to buy or sell.
-	OrderTypeLimit OrderType = "LIMIT"
-
-	// OrderTypeMarket is a market order which only specifies a quantity to
-	// buy or sell at the current market price.
-	OrderTypeMarket OrderType = "MARKET"
-
-	// OrderTypeStopLoss is a market order that only executes when a given
-	// stop price is reached. Usually used to minimize loss when the market
-	// drops.
-	OrderTypeStopLoss OrderType = "STOP_LOSS"
-
-	// OrderTypeStopLossLimit is a limit order that only executes when a
-	// given stop price is reached.
-	OrderTypeStopLossLimit OrderType = "STOP_LOSS_LIMIT"
-
-	// OrderTypeTakeProfit is a market order that only executes when a given
-	// stop price is reached. Usually used to lock in profits when the
-	// market suddenly rises.
-	OrderTypeTakeProfit OrderType = "TAKE_PROFIT"
-
-	// OrderTypeTakeProfitLimit is a limit order that only executed when a
-	// given stop price is reached. Usually used to lock in profits when
-	// the market suddenly rises.
-	OrderTypeTakeProfitLimit OrderType = "TAKE_PROFIT_LIMIT"
-
-	// OrderTypeLimitMaker is a limit order that is rejected if it would
-	// get executed immediately and trade as a taker.
-	OrderTypeLimitMaker OrderType = "LIMIT_MAKER"
-)
-
-// OrderResponseType defines the type of response you'd like to receive after
-// creating a new order.
-type OrderResponseType string
-
-const (
-	OrderResponseTypeAck    = "ACK"
-	OrderResponseTypeResult = "RESULT"
-	OrderResponseTypeFull   = "FULL"
-)
-
 // PriceTicker contains a price for a Symbol.
 type PriceTicker struct {
 	Symbol string
 	Price  float64
 }
-
-// Side indicates whether an order is buying or selling assets.
-type Side string
-
-const (
-	Buy  Side = "BUY"
-	Sell Side = "SELL"
-)
 
 func (ticker *PriceTicker) UnmarshalJSON(data []byte) error {
 	var resp priceTickerResponse

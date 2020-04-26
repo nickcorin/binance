@@ -26,15 +26,24 @@ func main() {
 		binance.WithSecretKey("MySecret"),
 	)
 
-	// Fetch your account information.
-	info, err := client.AccountInfo(context.Background())
+	// Create an order request.
+	req := binance.NewOrderRequest{
+		Price: 			0.81,
+		Side:			binance.OrderSideBuy,
+		Symbol: 		"ETHBTC",
+		TimeInForce: 	binance.GTC,
+		Type:			binance.OrderTypeLimit,
+		Quantity: 		0.5,
+	}
+
+	// Test the order.
+	err := client.NewOrderTest(context.Background(), &req)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Fetch the most recent candlesticks.
-	klines, err := client.Klines(context.Background(), binance.ETHBTC,
-		binance.FiveMinutes, 10)
+	// Place the order.
+	res, err := client.NewOrder(context.Background(), &req) 
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,21 +59,21 @@ func main() {
 
 ### Market Data
 
-- [x] Order Book
-- [x] Recent Trades
-- [x] Old Trade Data
-- [x] Aggregated Trades
-- [x] Kline / Candlestick Data
-- [x] Current Average Price
-- [x] 24 Hour Ticker
-- [x] Price Ticker
-- [x] Order Book Ticker
+- [ ] Order Book
+- [ ] Recent Trades
+- [ ] Old Trade Data
+- [ ] Aggregated Trades
+- [ ] Kline / Candlestick Data
+- [ ] Current Average Price
+- [ ] 24 Hour Ticker
+- [ ] Price Ticker
+- [ ] Order Book Ticker
 
 ### Account
 
 - [x] New Order
-- [ ] Test New Order
-- [x] Query Order
+- [x] Test New Order
+- [ ] Query Order
 - [ ] Cancel Order
 - [ ] Current Open Orders
 - [ ] All Orders
@@ -73,7 +82,7 @@ func main() {
 - [ ] Query OCO
 - [ ] Query All OCO
 - [ ] Query Open OCO
-- [x] Account Info
+- [ ] Account Info
 - [ ] Account Trade List
 
 ## Donations

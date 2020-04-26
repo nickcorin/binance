@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/gorilla/schema"
 	"github.com/luno/jettison"
 	"github.com/luno/jettison/errors"
 	"github.com/luno/jettison/j"
@@ -20,12 +21,16 @@ import (
 )
 
 type client struct {
+	encoder *schema.Encoder
+	decoder *schema.Decoder
 	options *ClientOptions
 }
 
 // NewClient returns a Client implementation.
 func NewClient(opts ...ClientOption) Client {
 	c := client{
+		encoder: schema.NewEncoder(),
+		decoder: schema.NewDecoder(),
 		options: &defaultOptions,
 	}
 
