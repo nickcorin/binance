@@ -107,7 +107,6 @@ func (c *client) call(ctx context.Context, method, path string,
 
 	// Set required headers and sign request.
 	req.Header.Set("Content-type", "application/x-www-form-urlencoded")
-
 	securityLevel := getSecurityLevel(u, method)
 
 	if securityLevel.RequiresAuth() {
