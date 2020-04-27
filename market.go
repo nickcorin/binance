@@ -64,15 +64,15 @@ type KlinesRequest struct {
 
 // Kline contains kline / candlestick data.
 type Kline struct {
-	Close            string
-	CloseTime        int64
-	High             string
-	OpenTime         int64
-	Open             string
-	Low              string
-	QuoteAssetVolume string
-	TradeCount       int64
-	Volume           string
+	Close             string
+	CloseTime         int64
+	High              string
+	OpenTime          int64
+	Open              string
+	Low               string
+	QuoteassertVolume string
+	TradeCount        int64
+	Volume            string
 }
 
 // UnmarshalJSON satisfies the json.Unmarshaler interface for the Kline type.
@@ -83,41 +83,47 @@ func (k *Kline) UnmarshalJSON(data []byte) error {
 	}
 
 	var ok bool
-	if k.OpenTime, ok = raw[0].(int64); !ok {
-		return fmt.Errorf("failed to asset %T to %T", raw[0], k.OpenTime)
+	if ot, ok := raw[0].(float64); ok {
+		k.OpenTime = int64(ot)
+	} else {
+		return fmt.Errorf("failed to assert %T to %T", raw[0], k.OpenTime)
 	}
 
 	if k.Open, ok = raw[1].(string); !ok {
-		return fmt.Errorf("failed to asset %T to %T", raw[0], k.Open)
+		return fmt.Errorf("failed to assert %T to %T", raw[0], k.Open)
 	}
 
 	if k.High, ok = raw[2].(string); !ok {
-		return fmt.Errorf("failed to asset %T to %T", raw[0], k.High)
+		return fmt.Errorf("failed to assert %T to %T", raw[0], k.High)
 	}
 
 	if k.Low, ok = raw[3].(string); !ok {
-		return fmt.Errorf("failed to asset %T to %T", raw[0], k.Low)
+		return fmt.Errorf("failed to assert %T to %T", raw[0], k.Low)
 	}
 
 	if k.Close, ok = raw[4].(string); !ok {
-		return fmt.Errorf("failed to asset %T to %T", raw[0], k.Close)
+		return fmt.Errorf("failed to assert %T to %T", raw[0], k.Close)
 	}
 
 	if k.Volume, ok = raw[5].(string); !ok {
-		return fmt.Errorf("failed to asset %T to %T", raw[0], k.Volume)
+		return fmt.Errorf("failed to assert %T to %T", raw[0], k.Volume)
 	}
 
-	if k.CloseTime, ok = raw[6].(int64); !ok {
-		return fmt.Errorf("failed to asset %T to %T", raw[0], k.CloseTime)
+	if ct, ok := raw[6].(float64); ok {
+		k.CloseTime = int64(ct)
+	} else {
+		return fmt.Errorf("failed to assert %T to %T", raw[0], k.CloseTime)
 	}
 
-	if k.QuoteAssetVolume, ok = raw[7].(string); !ok {
-		return fmt.Errorf("failed to asset %T to %T", raw[0],
-			k.QuoteAssetVolume)
+	if k.QuoteassertVolume, ok = raw[7].(string); !ok {
+		return fmt.Errorf("failed to assert %T to %T", raw[0],
+			k.QuoteassertVolume)
 	}
 
-	if k.TradeCount, ok = raw[8].(int64); !ok {
-		return fmt.Errorf("failed to asset %T to %T", raw[0], k.TradeCount)
+	if tc, ok := raw[8].(int64); ok {
+		k.TradeCount = int64(tc)
+	} else {
+		return fmt.Errorf("failed to assert %T to %T", raw[0], k.TradeCount)
 	}
 
 	return nil
