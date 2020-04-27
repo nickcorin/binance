@@ -120,7 +120,7 @@ func (k *Kline) UnmarshalJSON(data []byte) error {
 			k.QuoteassertVolume)
 	}
 
-	if tc, ok := raw[8].(int64); ok {
+	if tc, ok := raw[8].(float64); ok {
 		k.TradeCount = int64(tc)
 	} else {
 		return fmt.Errorf("failed to assert %T to %T", raw[0], k.TradeCount)
