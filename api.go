@@ -9,6 +9,7 @@ import (
 type Client interface {
 	AccountInfo(context.Context) (*AccountInfo, error)
 	CancelOrder(context.Context, *CancelOrderRequest) (*CancelOrderResponse, error)
+	Klines(context.Context, *KlinesRequest) ([]Kline, error)
 	OrderBookTicker(context.Context, string) (*OrderBookTicker, error)
 	NewOrder(context.Context, *NewOrderRequest) (*NewOrderResponse, error)
 	NewOrderTest(context.Context, *NewOrderRequest) error
